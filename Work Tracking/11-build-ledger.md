@@ -132,3 +132,19 @@ Ran /code-review (medium, multi-agent: 3 finder angles) + /security-review on th
 **Exact next action:** open Sprints 1–4 PRs when GitHub MCP returns. Then Sprint 5 (trainer review tabs + Realtime messaging; /security-review after).
 
 **Blockers:** GitHub MCP still down → PRs deferred. Cloud deploy deferred.
+
+## 2026-07-06 — Session 2 (Sprint 5)
+
+**Sprint:** 5 — trainer review tabs + Realtime messaging. Branch `claude/sprint-5-review-messaging` (stacked on Sprint 4).
+
+**Completed:**
+- Migration `20260709000001`: messages added to supabase_realtime publication; unread index; `notify_on_message` security-definer trigger (inserts a message_received notification for the other participant — clients can't self-insert notifications under RLS).
+- Realtime chat: shared `components/chat.tsx` — loads initial messages, subscribes to postgres_changes INSERTs filtered by thread (RLS scopes delivery), sends via insert, marks incoming read. Used by `/coach/messages/[clientId]` and `/app/messages` (+ `/coach/messages` thread list, Messages added to coach nav and client tab bar as "Coach").
+- Trainer review: `/coach/clients/[id]` restructured into a tabbed layout (Overview/Workouts/Check-ins/Nutrition/Progress). Overview shows adherence % (completed/scheduled-to-date) + profile + assigned programs. Workouts = per-session logged sets + volume + PR flags. Check-ins = recovery table with pain-flag highlight. Nutrition = current targets + recent meals. Progress = PRs + body metrics.
+- e2e `messaging.spec.ts`: trainer sees the client's real completed workout (120kg×5) + 100% adherence, then two live browser contexts exchange messages over Realtime (asserts cross-context delivery + 2 persisted rows).
+
+**Verification:** typecheck ✓, lint ✓, build ✓ (19 routes), pgTAP 46/46 ✓, e2e 12/12 ✓. /security-review pending (running next).
+
+**Exact next action:** run /security-review (messaging + storage); open Sprints 1–5 PRs when GitHub MCP returns; then Sprint 6 (progress trends, notifications, landing final, polish).
+
+**Blockers:** GitHub MCP still down → PRs deferred. Cloud deploy deferred.

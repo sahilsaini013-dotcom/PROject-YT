@@ -1,24 +1,15 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui";
 
-export const metadata = { title: "Client" };
+export const metadata = { title: "Client overview" };
 
-export default async function ClientProfilePage({
+export default async function ClientOverview({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
   const supabase = await createClient();
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", id)
-    .maybeSingle();
-  if (!profile) notFound();
 
   const { data: clientProfile } = await supabase
     .from("client_profiles")
@@ -32,34 +23,37 @@ export default async function ClientProfilePage({
     .eq("client_id", id)
     .order("start_date", { ascending: false });
 
+  // Adherence: completed vs scheduled sessions to date.
+  const today = new Date().toISOString().slice(0, 10);
+  const { count: dueCount } = await supabase
+    .from("workout_sessions")
+    .select("id", { count: "exact", head: true })
+    .eq("client_id", id)
+    .lte("scheduled_date", today);
+  const { count: doneCount } = await supabase
+    .from("workout_sessions")
+    .select("id", { count: "exact", head: true })
+    .eq("client_id", id)
+    .eq("status", "completed");
+
+  const adherence =
+    dueCount && dueCount > 0
+      ? Math.round(((doneCount ?? 0) / dueCount) * 100)
+      : null;
+
   return (
-    <main className="mx-auto max-w-4xl space-y-6 px-6 py-10">
-      <div>
-        <Link
-          href="/coach"
-          className="text-sm text-text-muted transition-colors hover:text-text"
-        >
-          ← Roster
-        </Link>
-        <div className="mt-2 flex items-center justify-between gap-4">
-          <h1 className="text-3xl font-bold">{profile.full_name}</h1>
-          <Link
-            href={`/coach/clients/${id}/nutrition/targets`}
-            className="rounded-(--radius-control) border border-border px-4 py-2 text-sm font-medium text-text transition-colors hover:border-text-muted"
-          >
-            Set nutrition targets
-          </Link>
-        </div>
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Stat label="Adherence" value={adherence === null ? "—" : `${adherence}%`} accent />
+        <Stat label="Completed" value={doneCount ?? 0} />
+        <Stat label="Scheduled" value={dueCount ?? 0} />
       </div>
 
       <Card>
         <h2 className="mb-3 font-bold">Profile</h2>
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <Detail label="Goal" value={clientProfile?.goal} />
-          <Detail
-            label="Experience"
-            value={clientProfile?.experience_level}
-          />
+          <Detail label="Experience" value={clientProfile?.experience_level} />
           <Detail label="Injuries" value={clientProfile?.injuries} />
           <Detail label="Schedule" value={clientProfile?.schedule_notes} />
           <Detail label="Equipment" value={clientProfile?.equipment_notes} />
@@ -90,7 +84,28 @@ export default async function ClientProfilePage({
           </ul>
         )}
       </Card>
-    </main>
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  accent?: boolean;
+}) {
+  return (
+    <Card>
+      <p
+        className={`tnum text-2xl font-extrabold ${accent ? "text-accent" : "text-text"}`}
+      >
+        {value}
+      </p>
+      <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
+    </Card>
   );
 }
 
