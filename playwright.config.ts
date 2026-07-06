@@ -1,5 +1,16 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
+
+// Make the app's local Supabase env available to the test runner process
+// (webServer inherits it via Next, but specs that call the REST API directly
+// read it from process.env).
+const envPath = "apps/web/.env.local";
+if (existsSync(envPath)) {
+  for (const line of readFileSync(envPath, "utf8").split("\n")) {
+    const match = line.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (match && !process.env[match[1]]) process.env[match[1]] = match[2];
+  }
+}
 
 const PORT = Number(process.env.PORT ?? 3000);
 

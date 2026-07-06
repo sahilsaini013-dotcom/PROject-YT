@@ -79,7 +79,7 @@ values ('ffffffff-0000-0000-0000-000000000004', '22222222-2222-2222-2222-2222222
 -- Tests
 -- ============================================================
 
-select plan(39);
+select plan(46);
 
 -- Helper: run the rest of the transaction as an authenticated stranger.
 -- (pgTAP runs inside one transaction; set_config(..., true) scopes to it.)
@@ -92,7 +92,11 @@ end;
 $$;
 
 -- ---- signup trigger created profiles with sane roles
-select is((select count(*) from public.profiles), 4::bigint, 'signup trigger created all four profiles');
+select is(
+  (select count(*) from public.profiles where id in (
+    '11111111-1111-1111-1111-111111111111','22222222-2222-2222-2222-222222222222',
+    '33333333-3333-3333-3333-333333333333','44444444-4444-4444-4444-444444444444')),
+  4::bigint, 'signup trigger created all four fixture profiles');
 select is((select role from public.profiles where id = '11111111-1111-1111-1111-111111111111'), 'trainer'::user_role, 'trainer role honored from metadata');
 
 -- ---- stranger CLIENT (client2) sees none of pair 1's data — one negative per table
@@ -147,6 +151,14 @@ select throws_ok(
 select test_as('33333333-3333-3333-3333-333333333333');
 
 select is((select count(*) from public.check_ins), 0::bigint, 'check_ins: unlinked trainer sees nothing');
+-- Sprint 2: another trainer cannot read trainer1's program tree or assignments
+select is((select count(*) from public.programs where id = 'dddddddd-0000-0000-0000-000000000001'), 0::bigint, 'programs: another trainer cannot read a peer''s program');
+select is((select count(*) from public.program_weeks where id = 'dddddddd-0000-0000-0000-000000000002'), 0::bigint, 'program_weeks: hidden from another trainer');
+select is((select count(*) from public.program_days where id = 'dddddddd-0000-0000-0000-000000000003'), 0::bigint, 'program_days: hidden from another trainer');
+select is((select count(*) from public.program_day_exercises where id = 'dddddddd-0000-0000-0000-000000000004'), 0::bigint, 'program_day_exercises: hidden from another trainer');
+select is((select count(*) from public.program_assignments where id = 'dddddddd-0000-0000-0000-000000000005'), 0::bigint, 'program_assignments: hidden from another trainer');
+select is((select count(*) from public.workout_sessions where id = 'dddddddd-0000-0000-0000-000000000006'), 0::bigint, 'workout_sessions: hidden from another trainer');
+select is((select count(*) from public.exercises where id = 'cccccccc-0000-0000-0000-000000000001'), 0::bigint, 'exercises: another trainer''s custom exercise hidden');
 select throws_ok(
   $$insert into public.trainer_clients (trainer_id, client_id, status) values ('33333333-3333-3333-3333-333333333333', '22222222-2222-2222-2222-222222222222', 'active')$$,
   '42501', null, 'trainer_clients: trainer cannot insert an active link directly');
