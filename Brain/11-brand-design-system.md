@@ -63,16 +63,16 @@ Prompt cells are short summaries, filled in as generation happens.
 
 | Asset | Model & settings | Prompt | Status |
 | --- | --- | --- | --- |
-| Logo concepts x6 | Recraft V4.1, `model_type: vector`, palette-constrained | Icon + wordmark explorations, volt on ink | pending generation |
-| Primary lockup (icon + "Training Hub" wordmark) | Recraft V4.1, vector | Chosen concept, horizontal lockup | pending generation |
-| Icon-only mark | Recraft V4.1, vector | Standalone icon from chosen concept | pending generation |
-| Favicon 32x32 | From icon mark + downscale | — | pending generation |
-| PWA maskable icons 192/512 | From icon mark, safe-zone padded | — | pending generation |
-| Splash screen 1080x1920 | Recraft V4.1, vector | Icon centered on ink, subtle texture | pending generation |
-| OG image 1200x630 | Recraft V4.1, 16:9 | Lockup + tagline for link previews | pending generation |
-| Email header | Recraft V4.1, vector | Slim lockup banner on ink | pending generation |
-| Logo reveal ~4s | Seedance 2.0, `generate_audio: false`, end frame = logo | Volt energy resolving into the mark | pending generation |
-| Landing hero loop ~8s | Seedance 2.0, muted loop | Athletic dark-gym motion, brand-toned | pending generation |
-| Workout-complete celebration ~3s | Seedance 2.0, muted loop | Volt burst / rep-counter flourish | pending generation |
-| Exercise-category illustrations x15 | Recraft V4.1, `utility_vector` | One per category: squat, hinge, lunge, horizontal push, vertical push, horizontal pull, vertical pull, carry, core, cardio, mobility, plyometric, olympic, isolation, stretching | pending generation |
-| Empty-state illustrations x3 | Recraft V4.1, `utility_vector` | No clients, no program, no logs | pending generation |
+| Logo concepts x12 (2 rounds) | Recraft V4.1, `model_type: vector`, 3:2, palette-constrained | Round 1: gym-literal metaphors (rejected). Round 2: minimal/premium. Winner: concept 9 "hexagon arrow" — white hexagon, negative-space upward arrow, one volt edge (job `9b21eb38`) | done — `assets/brand/concepts/` |
+| Primary lockup (icon + "Training Hub" wordmark) | Vector master extracted from winning SVG (paths cropped to content bbox) | — | done — `lockup.svg`, `lockup-dark.svg`, `lockup-2048.png` |
+| Icon-only mark | Hexagon+volt paths extracted from winning SVG, squared viewBox | — | done — `icon.svg` (transparent), `icon-maskable.svg` (ink bg, safe zone) |
+| Favicon 32/64 | icon-512 render downscaled (Lanczos) | — | done — `favicon-32.png`, `favicon-64.png` |
+| PWA icons 180/192/512 | Chromium raster of `icon-maskable.svg`, downscaled | — | done — `apple-touch-icon-180.png`, `icon-192.png`, `icon-512.png` |
+| Splash screen 1080x1920 | Chromium raster, lockup centered on ink | — | done — `splash-1080x1920.png` |
+| OG image 1200x630 | Chromium raster, lockup centered on ink | — | done — `og-1200x630.png` |
+| Email header 1200x300 | Chromium raster, lockup on ink | — | done — `email-header-1200x300.png` |
+| Logo reveal ~5s | Seedance 2.0, 1080p, `generate_audio: false`, end frame = winning logo job | Volt light traces draw the hexagon, lockup assembles, settles still | blocked — video generation requires interactive MCP approval |
+| Landing hero loop ~8s | Seedance 2.0, 1080p 16:9, muted loop | Dark-gym slow-motion athlete montage, volt rim light | blocked — video generation requires interactive MCP approval |
+| Workout-complete celebration ~4s | Seedance 2.0, 720p 9:16, muted | Volt energy pulse + rising particles, settles calm | blocked — video generation requires interactive MCP approval |
+| Exercise-category illustrations x15 | Recraft V4.1, `utility_vector`, 1:1, palette-constrained | "Flat vector fitness illustration, consistent icon-style set: [movement], off-white geometric figure, one volt accent, ink background" — squat, hinge, lunge, horizontal push, vertical push, horizontal pull, vertical pull, carry, core, cardio, mobility, plyometric, olympic, isolation, stretching | generated — `assets/brand/exercises/` |
+| Empty-state illustrations x3 | Recraft V4.1, `utility_vector`, 1:1 | No clients (clipboard + silhouettes), no program (blueprint + barbell), no logs (empty chart + rising trendline) | generated — `assets/brand/empty-states/` |
