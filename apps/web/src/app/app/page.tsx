@@ -1,8 +1,18 @@
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ButtonLink, Card } from "@/components/ui";
 
 export const metadata = { title: "Today" };
+
+function todayISO(timezone: string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
 
 export default async function ClientToday() {
   const supabase = await createClient();
@@ -12,17 +22,30 @@ export default async function ClientToday() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name")
+    .select("full_name, timezone")
     .eq("id", user!.id)
     .single();
 
   const { data: clientProfile } = await supabase
     .from("client_profiles")
-    .select("id, goal")
+    .select("id")
     .eq("id", user!.id)
     .maybeSingle();
 
+  const today = todayISO(profile?.timezone ?? "UTC");
   const firstName = profile?.full_name?.split(" ")[0] ?? "there";
+
+  const { data: sessions } = await supabase
+    .from("workout_sessions")
+    .select("id, scheduled_date, status, program_day:program_days(name)")
+    .eq("client_id", user!.id)
+    .neq("status", "completed")
+    .gte("scheduled_date", today)
+    .order("scheduled_date")
+    .limit(8);
+
+  const todaySession = sessions?.find((s) => s.scheduled_date === today);
+  const upcoming = (sessions ?? []).filter((s) => s.id !== todaySession?.id);
 
   return (
     <main className="min-h-screen bg-ink px-6 py-10">
@@ -47,20 +70,75 @@ export default async function ClientToday() {
           </Card>
         )}
 
-        <Card className="flex flex-col items-center py-10 text-center">
-          <Image
-            src="/brand/empty-states/no-program.svg"
-            alt=""
-            width={130}
-            height={130}
-            className="mb-4 rounded-(--radius-control)"
-          />
-          <h2 className="text-lg font-bold">No workout scheduled</h2>
-          <p className="mt-1 max-w-xs text-sm text-text-muted">
-            Your coach hasn&apos;t assigned a program yet. It&apos;ll show up
-            here the moment they do.
-          </p>
-        </Card>
+        {todaySession ? (
+          <Card className="border-accent/40">
+            <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+              Today&apos;s workout
+            </p>
+            <h2 className="mt-1 text-xl font-bold">
+              {todaySession.program_day?.name ?? "Workout"}
+            </h2>
+            <ButtonLink
+              href={`/app/workout/${todaySession.id}`}
+              className="mt-4 w-full text-center"
+            >
+              {todaySession.status === "in_progress" ? "Resume" : "Start"}{" "}
+              workout
+            </ButtonLink>
+          </Card>
+        ) : (
+          <Card className="flex flex-col items-center py-10 text-center">
+            <Image
+              src="/brand/empty-states/no-program.svg"
+              alt=""
+              width={130}
+              height={130}
+              className="mb-4 rounded-(--radius-control)"
+            />
+            <h2 className="text-lg font-bold">Nothing due today</h2>
+            <p className="mt-1 max-w-xs text-sm text-text-muted">
+              Rest up. Your next session shows up here when it&apos;s scheduled.
+            </p>
+          </Card>
+        )}
+
+        {upcoming.length > 0 && (
+          <div>
+            <h3 className="mb-2 text-sm font-semibold text-text-muted">
+              Coming up
+            </h3>
+            <Card className="p-0">
+              <ul className="divide-y divide-border">
+                {upcoming.map((s) => (
+                  <li
+                    key={s.id}
+                    className="flex items-center justify-between px-5 py-3 text-sm"
+                  >
+                    <span>{s.program_day?.name ?? "Workout"}</span>
+                    <span className="tnum text-text-muted">
+                      {new Date(
+                        `${s.scheduled_date}T00:00:00`,
+                      ).toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+        )}
+
+        <nav className="flex justify-center gap-6 pt-2 text-sm text-text-muted">
+          <Link href="/app/progress" className="transition-colors hover:text-text">
+            Progress
+          </Link>
+          <Link href="/app/settings" className="transition-colors hover:text-text">
+            Settings
+          </Link>
+        </nav>
       </div>
     </main>
   );

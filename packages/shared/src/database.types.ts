@@ -1278,6 +1278,15 @@ export type Database = {
     }
     Functions: {
       accept_invitation: { Args: { _token: string }; Returns: string }
+      assign_program: {
+        Args: {
+          _client_id: string
+          _notes?: string
+          _program_id: string
+          _start_date: string
+        }
+        Returns: number
+      }
       can_read_exercise: {
         Args: { _exercise: string; _user: string }
         Returns: boolean
@@ -1285,6 +1294,19 @@ export type Database = {
       client_has_assignment: {
         Args: { _client: string; _program: string }
         Returns: boolean
+      }
+      complete_workout_session: {
+        Args: {
+          _client_notes?: string
+          _session_id: string
+          _session_rpe?: number
+        }
+        Returns: {
+          exercise_id: string
+          exercise_name: string
+          kind: Database["public"]["Enums"]["pr_kind"]
+          value: number
+        }[]
       }
       create_invitation: {
         Args: { _email: string }
