@@ -60,14 +60,25 @@ For each sprint: branch → build the slice → verify (below) → self-review �
 - Match the brand: dark-only, tokens from `Brain/11`, volt scarce, tabular numerals for logged data. Screens should look like the premium product the docs describe, not a wireframe.
 - Commit early and often with clear messages; push at every stable point (sandboxes are ephemeral). Keep main deployable at all times.
 
-## Stuck protocol
+## No-halt protocol (the build never stops)
 
-After 3 genuinely different failed attempts at the same obstacle: write it up in `Work Tracking/05-risk-log.md` (what failed, why, evidence), pick the best workaround consistent with locked decisions, note it in the ledger, and keep moving. Circle back before v1 ships.
+A "stop" is never an end state. On any blocker, walk this ladder in order:
 
-## Ask the user only for
+1. **Self-resolve in the sandbox** — up to 3 genuinely different attempts (different approach each time, not retries).
+2. **Self-resolve through the user's Google Chrome connector** — if a browser/Chrome connector tool is available in the session (search for it with ToolSearch before assuming it isn't), use it to figure the blocker out yourself: read docs and dashboards, complete signups or project creation (e.g. Supabase project, Vercel link), retrieve non-secret configuration, verify external state. Treat the user's logged-in browser with care: least-privilege actions only, nothing destructive, no purchases, never exfiltrate credentials into the repo or logs — copy secrets only into gitignored `.env` files, and record in the ledger *what* was obtained, never the values.
+3. **Defer and reroute** — if the ladder fails: log the blocker in `Work Tracking/05-risk-log.md` (what failed, why, evidence), append a `DEFERRED:` item to the ledger with exactly what would unblock it, then immediately pull the next unblocked work forward — later sprint tasks, tests, seed data, UI polish, docs. The session keeps producing regardless.
+4. **Circle back** — every session-start ritual re-checks `DEFERRED:` items; before v1 ships, all of them must be resolved or explicitly descoped via a decision-log entry.
 
-1. **Credentials** (Supabase cloud, Vercel, SMTP/email provider) — ask once, keep building everything else meanwhile.
-2. **Genuine scope contradictions** — where the docs conflict with each other or with reality and the decision log doesn't resolve it. Everything else: decide, log it, proceed.
+Questions for the user follow the same rule: ask **asynchronously** (in the ledger, PR description, or a message) and keep building everything that doesn't depend on the answer. Never idle waiting for a reply.
+
+## Final phase — multi-agent UI audit (mandatory before declaring v1 done)
+
+After the Definition of Done suite passes, run an adversarial audit-and-fix loop. This is part of the goal, not optional polish:
+
+1. **Fan out parallel audit agents**, each driving the real running app in Chromium with screenshots, one lens per agent: (a) visual/brand consistency vs `Brain/11` (tokens, volt scarcity, typography, spacing); (b) responsive behavior — `/app` at 360/390/430px widths, `/coach` at 1280/1440+; (c) accessibility — contrast, focus order, labels, keyboard nav, a11y ≥ 90; (d) flow friction — every screen in `Brain/09` walked end-to-end, dead ends and confusing states; (e) empty/error/loading states — new-account experience, offline PWA, failed requests; (f) data correctness — logged numbers rendering right (units, tabular alignment, trends).
+2. **Verify findings** — dedupe, then confirm each finding is real (reproduce it) before fixing; discard speculation.
+3. **Fix and re-audit** — apply fixes, re-run the affected lenses. Loop until two consecutive audit rounds surface nothing new (loop-until-dry). Log each round's findings and fixes in the ledger.
+4. Only then write the v1 completion report.
 
 ## Definition of Done (v1 ships when ALL pass as Playwright e2e in CI)
 
@@ -79,4 +90,4 @@ After 3 genuinely different failed attempts at the same obstacle: write it up in
 6. Notifications fire for invite, assigned workout, and new message (in-app + email; email may be a captured test transport).
 7. `/app` is an installable dark-theme PWA with brand tokens and fonts applied; a11y ≥ 90.
 
-On completion: update `07-release-log.md` (v1 entry), dashboard, sprint board, and ledger; write the final report with links to the merged PRs and passing CI runs. Phase 2 (AI review inbox) begins only after that report.
+On completion: run the **Final phase — multi-agent UI audit** above until dry, then update `07-release-log.md` (v1 entry), dashboard, sprint board, and ledger; write the final report with links to the merged PRs, passing CI runs, and the audit rounds. Phase 2 (AI review inbox) begins only after that report.
