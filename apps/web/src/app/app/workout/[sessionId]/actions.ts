@@ -18,6 +18,7 @@ export type SavedSet = {
   weight_kg: number | null;
   reps: number | null;
   rpe: number | null;
+  pain_note: string | null;
   substituted_exercise_id: string | null;
 };
 
@@ -29,6 +30,19 @@ export async function saveSet(sessionId: string, set: SavedSet) {
     { session_id: sessionId, ...set },
     { onConflict: "session_id,program_day_exercise_id,set_index" },
   );
+}
+
+export async function saveExerciseNote(
+  sessionId: string,
+  programDayExerciseId: string,
+  note: string | null,
+) {
+  const supabase = await createClient();
+  await supabase
+    .from("set_logs")
+    .update({ pain_note: note })
+    .eq("session_id", sessionId)
+    .eq("program_day_exercise_id", programDayExerciseId);
 }
 
 export type PrAchieved = {
