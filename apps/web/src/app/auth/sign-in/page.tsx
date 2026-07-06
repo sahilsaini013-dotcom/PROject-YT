@@ -33,9 +33,12 @@ function SignInForm() {
         return;
       }
       const role = data.user?.user_metadata?.role;
-      router.push(
-        searchParams.get("next") ?? (role === "trainer" ? "/coach" : "/app"),
-      );
+      const next = searchParams.get("next");
+      // Only same-origin relative paths — an absolute/protocol-relative next
+      // would let a crafted link bounce a fresh sign-in to a phishing site.
+      const safeNext =
+        next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+      router.push(safeNext ?? (role === "trainer" ? "/coach" : "/app"));
       router.refresh();
     } else {
       const { error } = await supabase.auth.signInWithOtp({
