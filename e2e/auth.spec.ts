@@ -87,6 +87,25 @@ test.describe.serial("auth + invite flow", () => {
     await expect(page).toHaveURL(/\/auth\/sign-in/);
   });
 
+  test("signing out returns to sign-in without crashing", async ({ page }) => {
+    await page.goto("/auth/sign-in");
+    await page.getByLabel("Email").fill(trainerEmail);
+    await page.getByLabel("Password").fill("training-hub-e2e");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page).toHaveURL(/\/coach/);
+    await page.getByRole("button", { name: "Sign out" }).click();
+    await expect(page).toHaveURL(/\/auth\/sign-in/);
+    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  });
+
+  test("magic-link callback with a bad code lands on sign-in", async ({
+    page,
+  }) => {
+    // The callback route must consume the code param, not 404 or hang.
+    await page.goto("/auth/callback?code=invalid-code");
+    await expect(page).toHaveURL(/\/auth\/sign-in/);
+  });
+
   test("expired invite tokens are rejected", async ({ browser }) => {
     const trainerContext = await browser.newContext();
     const trainerPage = await trainerContext.newPage();

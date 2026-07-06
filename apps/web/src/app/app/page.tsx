@@ -1,7 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Card } from "@/components/ui";
+import { ButtonLink, Card } from "@/components/ui";
 
 export const metadata = { title: "Today" };
 
@@ -42,12 +41,9 @@ export default async function ClientToday() {
             <p className="mt-1 text-sm text-text-muted">
               Tell your coach about your goals and training setup.
             </p>
-            <Link
-              href="/app/onboarding"
-              className="mt-4 inline-block rounded-(--radius-control) bg-accent px-5 py-2.5 font-semibold text-ink transition-colors hover:bg-accent-pressed"
-            >
+            <ButtonLink href="/app/onboarding" className="mt-4">
               Complete profile
-            </Link>
+            </ButtonLink>
           </Card>
         )}
 

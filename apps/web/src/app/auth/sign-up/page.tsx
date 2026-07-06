@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { signUpMetadata } from "@/lib/auth";
 import { Button, Card, ErrorText, Input, Label } from "@/components/ui";
 
 export default function SignUpPage() {
@@ -23,13 +24,7 @@ export default function SignUpPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          role: "trainer",
-          full_name: fullName,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-      },
+      options: { data: signUpMetadata("trainer", fullName) },
     });
     setBusy(false);
     if (error) {

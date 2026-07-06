@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export type InviteResult =
@@ -44,5 +45,7 @@ export async function inviteClient(
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  revalidatePath("/", "layout");
+  // Redirect off the authed route so the roster never re-renders without a
+  // session (which would deref a null user).
+  redirect("/auth/sign-in");
 }

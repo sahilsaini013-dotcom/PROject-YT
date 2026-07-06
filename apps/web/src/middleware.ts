@@ -1,8 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Session refresh + role routing. user_metadata.role decides where a user
-// belongs; RLS remains the actual data guard.
+// Session refresh + role routing. Role is read from the profiles table
+// (immutable after signup) rather than user-mutable auth metadata; RLS
+// remains the actual data guard.
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -31,29 +32,37 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Carry any refreshed-session cookies from `response` onto a redirect, so
+  // rotated refresh tokens actually reach the browser.
+  const redirectTo = (pathname: string, search?: string) => {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname;
+    url.search = search ?? "";
+    const redirect = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((c) => redirect.cookies.set(c));
+    return redirect;
+  };
+
   const path = request.nextUrl.pathname;
   const wantsCoach = path === "/coach" || path.startsWith("/coach/");
   const wantsApp = path === "/app" || path.startsWith("/app/");
 
   if (!user && (wantsCoach || wantsApp)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/sign-in";
-    url.searchParams.set("next", path);
-    return NextResponse.redirect(url);
+    return redirectTo("/auth/sign-in", `?next=${encodeURIComponent(path)}`);
   }
 
   if (user) {
-    const role = user.user_metadata?.role === "trainer" ? "trainer" : "client";
-    if (wantsCoach && role !== "trainer") {
-      return NextResponse.redirect(new URL("/app", request.url));
-    }
-    if (wantsApp && role !== "client") {
-      return NextResponse.redirect(new URL("/coach", request.url));
-    }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    const role = profile?.role === "trainer" ? "trainer" : "client";
+
+    if (wantsCoach && role !== "trainer") return redirectTo("/app");
+    if (wantsApp && role !== "client") return redirectTo("/coach");
     if (path.startsWith("/auth/") && !path.startsWith("/auth/invite/")) {
-      return NextResponse.redirect(
-        new URL(role === "trainer" ? "/coach" : "/app", request.url),
-      );
+      return redirectTo(role === "trainer" ? "/coach" : "/app");
     }
   }
 
@@ -61,5 +70,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/coach/:path*", "/app/:path*", "/auth/:path*", "/coach", "/app"],
+  // /auth/callback is excluded — it must run its code exchange, not be
+  // bounced by the signed-in redirect.
+  matcher: [
+    "/coach/:path*",
+    "/app/:path*",
+    "/auth/sign-in",
+    "/auth/sign-up",
+    "/coach",
+    "/app",
+  ],
 };

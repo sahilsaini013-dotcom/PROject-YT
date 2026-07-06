@@ -89,7 +89,9 @@ export default async function CoachRoster() {
                   key={link.id}
                   className="flex items-center justify-between px-6 py-4"
                 >
-                  <span className="font-medium">{link.client?.full_name}</span>
+                  <span className="font-medium">
+                    {link.client?.full_name ?? "—"}
+                  </span>
                   <span className={`text-sm capitalize ${statusStyles[link.status] ?? "text-text-muted"}`}>
                     {link.status}
                   </span>
@@ -110,7 +112,7 @@ export default async function CoachRoster() {
                     className="flex items-center justify-between px-6 py-4"
                   >
                     <span className="text-sm">{invite.email}</span>
-                    <span className="text-sm text-text-muted">
+                    <span className="tnum text-sm text-text-muted">
                       expires{" "}
                       {new Date(invite.expires_at).toLocaleDateString("en-US", {
                         month: "short",

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { signUpMetadata } from "@/lib/auth";
 import { Button, ErrorText, Input, Label } from "@/components/ui";
 
 export function AcceptInviteForm({
@@ -24,21 +25,27 @@ export function AcceptInviteForm({
     setBusy(true);
     const supabase = createClient();
 
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          role: "client",
-          full_name: fullName,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-      },
-    });
-    if (signUpError) {
-      setBusy(false);
-      setError(signUpError.message);
-      return;
+    const { data: signUpData, error: signUpError } =
+      await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: signUpMetadata("client", fullName) },
+      });
+
+    // If the email already has an account (e.g. a re-invite), fall back to
+    // signing in so the accept RPC still runs authenticated.
+    if (signUpError || !signUpData.session) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInError) {
+        setBusy(false);
+        setError(
+          "That email already has an account. Enter its password to accept the invite.",
+        );
+        return;
+      }
     }
 
     const { error: acceptError } = await supabase.rpc("accept_invitation", {

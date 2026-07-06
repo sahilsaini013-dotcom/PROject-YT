@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { homePathForRole } from "@/lib/auth";
 import { Button, Card, ErrorText, Input, Label } from "@/components/ui";
 
 function SignInForm() {
@@ -38,12 +39,22 @@ function SignInForm() {
       // would let a crafted link bounce a fresh sign-in to a phishing site.
       const safeNext =
         next && next.startsWith("/") && !next.startsWith("//") ? next : null;
-      router.push(safeNext ?? (role === "trainer" ? "/coach" : "/app"));
+      router.push(safeNext ?? homePathForRole(role));
       router.refresh();
     } else {
+      const next = searchParams.get("next");
+      const callback = new URL("/auth/callback", window.location.origin);
+      if (next && next.startsWith("/") && !next.startsWith("//")) {
+        callback.searchParams.set("next", next);
+      }
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/` },
+        // Don't provision accounts from the sign-in form — client accounts
+        // are created only through the invite flow.
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: callback.toString(),
+        },
       });
       setBusy(false);
       if (error) {
