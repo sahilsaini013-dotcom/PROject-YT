@@ -15,12 +15,17 @@
 
 ## Technical
 
-- Should the first backend use a managed platform or a custom API service?
 - Should wearable integrations launch in v1 or shortly after?
 - Should exercise videos be hosted by Training Hub or linked from external sources?
 
+### Answered
+
+- Should the first backend use a managed platform or a custom API service? Answered: managed platform — Supabase (Postgres, Auth, Realtime, Storage, RLS). See DEC-010.
+- Should v1 ship native apps or web-first? Answered: web-first — one Next.js app serving the trainer dashboard and a mobile-first client PWA; native apps come after the coaching loop is proven. See DEC-008.
+
 ## Brand
 
-- Should Training Hub feel more elite/performance-focused or friendly/accountability-focused?
-- Should the visual identity lean dark and athletic or clean and clinical?
+### Answered
 
+- Should Training Hub feel more elite/performance-focused or friendly/accountability-focused? Answered: elite/performance-focused. See DEC-012.
+- Should the visual identity lean dark and athletic or clean and clinical? Answered: dark and athletic — near-black surfaces, volt-green accent, bold type. See DEC-012.
