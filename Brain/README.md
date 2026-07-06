@@ -13,6 +13,10 @@ Use this folder for durable product truth, not task tracking.
 - `05-data-model-notes.md` - core objects the app needs to store.
 - `06-roadmap.md` - phased product build direction.
 - `07-open-questions.md` - decisions to revisit later.
+- `08-mvp-scope.md` - what is in and out of the v1 web-first MVP.
+- `09-screen-inventory.md` - every screen in the trainer dashboard, client PWA, and landing page.
+- `10-database-schema.md` - Postgres schema and row level security policies.
+- `11-brand-design-system.md` - palette, typography, and brand asset inventory.
 
 ## Use Brain For
 

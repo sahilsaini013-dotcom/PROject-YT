@@ -1,27 +1,24 @@
 # Sprint Board
 
-## Sprint 0: Project Setup and Requirements
+## Sprint 0: Foundation and Brand
 
-Goal: make Training Hub ready for design and engineering execution.
+Goal: brand and foundation exist — docs updated, brand assets generated, monorepo scaffolded, CI running, landing page shell live with hero animation.
 
-Dates: TBD
+Dates: started 2026-07-06
 
 ## To Do
 
 | ID | Task | Owner | Notes |
 | --- | --- | --- | --- |
-| S0-001 | Finalize MVP scope | TBD | Confirm what is in v1 vs Phase 2. |
-| S0-002 | Write screen inventory | TBD | Trainer web, trainer mobile, client mobile. |
-| S0-003 | Draft user journey map | TBD | Invite to program to logging to AI review. |
-| S0-004 | Draft data model | TBD | Use project brain as source. |
-| S0-005 | Choose stack and repo shape | TBD | Native iOS, native Android, web dashboard, backend. |
-| S0-006 | Create first design direction | TBD | Premium trainer-first product. |
+| S0-007 | Scaffold monorepo | TBD | Docs at root, `apps/web` (Next.js 15 + TypeScript + Tailwind + shadcn/ui), `supabase/`, `packages/shared`. See DEC-011. |
+| S0-008 | Set up CI | TBD | Lint, typecheck, build on every push. |
+| S0-009 | Build landing page shell | TBD | One-page marketing site with hero animation and sign-up CTA. See DEC-013. |
 
 ## In Progress
 
 | ID | Task | Owner | Notes |
 | --- | --- | --- | --- |
-| S0-000 | Create tracking system | Codex | Initial tracking folder and docs. |
+| S0-006 | Generate logo and brand assets | Claude | Icon + "Training Hub" wordmark lockup via Higgsfield (Recraft V4.1 vectors, Seedance 2.0 animations). See DEC-012. |
 
 ## Review
 
@@ -34,9 +31,27 @@ Dates: TBD
 | --- | --- | --- | --- |
 | S0-D01 | Create main product plan | Codex | Saved in Project YT. |
 | S0-D02 | Create project brain | Codex | Saved in Project YT/Brain. |
+| S0-000 | Create tracking system | Codex | Initial tracking folder and docs. |
+| S0-001 | Update planning docs for execution | Claude | Decisions DEC-007..DEC-013 logged; plan, risks, backlog, dashboard revised. |
+| S0-002 | Write MVP scope doc | Claude | `Brain/08-mvp-scope.md` — v1 in/out scope. |
+| S0-003 | Write screen inventory | Claude | `Brain/09-screen-inventory.md` — trainer dashboard, client PWA, landing page. |
+| S0-004 | Draft database schema | Claude | `Brain/10-database-schema.md` — Postgres schema + RLS. |
+| S0-005 | Write brand design system | Claude | `Brain/11-brand-design-system.md` — palette, typography, asset inventory. |
+
+## Next Sprints
+
+| Sprint | Slice | Proves |
+| --- | --- | --- |
+| 1 | Auth + roles + trainer-to-client invite (branded email) + client onboarding | Two-sided account system |
+| 2 | Exercise library (seeded with generated media) + program builder + workout assignment | Trainer can program |
+| 3 | Client Today view + workout player + set logging + session summary with celebration animation | Client can train — coaching loop closes read-only |
+| 4 | Daily check-ins + nutrition targets + meal/water logging | Recovery + nutrition pillars live |
+| 5 | Trainer review (client detail: logs, check-ins, adherence) + realtime messaging | Full coaching loop closes |
+| 6 | Progress view (trends, PRs, consistency) + notifications + landing page final + polish | v1 complete per MVP scope |
+
+Phase 2 (AI review inbox) starts only after Sprint 6.
 
 ## Sprint Notes
 
-- Keep Sprint 0 focused on clarity, not building.
-- Implementation should start only after screens, data model, and first backlog are stable.
-
+- Quality bar is production-lean (DEC-009): real auth and database from day one, minimal infra, every sprint ships something a real trainer could use.
+- Build capacity is a solo founder working with Claude Code (DEC-007): one codebase surface at a time.

@@ -10,6 +10,13 @@ Use this file for decisions that affect product, architecture, brand, scope, or 
 | DEC-004 | 2026-07-05 | Payments are Phase 2. | Business tools matter, but coaching foundation comes first. | Accepted |
 | DEC-005 | 2026-07-05 | Native mobile apps are planned for iOS and Android. | The user prefers native mobile for the client/trainer app experience. | Accepted |
 | DEC-006 | 2026-07-05 | Trainers also need a web dashboard. | Programming, review, and client management are easier on desktop. | Accepted |
+| DEC-007 | 2026-07-06 | Build capacity is a solo founder working with Claude Code. | Scope must fit one builder; favor one codebase surface at a time. | Accepted |
+| DEC-008 | 2026-07-06 | v1 is web-first: one Next.js app serving the trainer dashboard and the client experience as a mobile-first PWA. | Native iOS/Android is deferred until the coaching loop is proven with real trainers; this revises the sequencing of DEC-005, not the long-term plan. | Accepted |
+| DEC-009 | 2026-07-06 | Quality bar is "production-lean". | Real auth and database from day one, minimal infra, every sprint ships something a real trainer could use; not a throwaway prototype, not enterprise setup. | Accepted |
+| DEC-010 | 2026-07-06 | Backend is Supabase (managed Postgres, Auth, Realtime, Storage, RLS). | Supersedes the custom NestJS API for v1; still Postgres, so the data model carries over if we outgrow it. | Accepted |
+| DEC-011 | 2026-07-06 | This repo becomes a monorepo: docs at root, code in `apps/web` (Next.js 15 + TypeScript + Tailwind + shadcn/ui), `supabase/`, `packages/shared`. | One repo keeps docs, schema, and code in sync for a solo builder. | Accepted |
+| DEC-012 | 2026-07-06 | Brand direction is dark, athletic, premium: near-black surfaces, volt-green accent (#C6FF00), bold type, icon + "Training Hub" wordmark lockup. | Matches the elite/performance positioning; assets generated via Higgsfield (Recraft V4.1 vectors, Seedance 2.0 animations). | Accepted |
+| DEC-013 | 2026-07-06 | v1 includes a public one-page marketing/landing page with sign-up CTA. | Built in the same Next.js app, so the product has a front door from day one. | Accepted |
 
 ## Decision Template
 

@@ -10,37 +10,41 @@ Define and build the foundation for a trainer-first fitness platform that combin
 
 ## Current Phase
 
-Planning and product foundation.
+Execution — Sprint 0: Foundation and Brand.
 
 ## Status
 
-Green: product direction is clear. Execution work has not started yet.
+Green: architecture and scope decisions are locked (DEC-007..DEC-013). Execution has started.
 
 ## Active Priorities
 
-1. Lock MVP scope and user journeys.
-2. Define product requirements for trainer dashboard and client app.
-3. Choose technical architecture and repo structure.
-4. Create initial design system and screen map.
-5. Convert the backlog into buildable tickets.
+1. Generate logo and brand assets (icon + wordmark, hero animation).
+2. Scaffold the monorepo: `apps/web`, `supabase/`, `packages/shared`.
+3. Set up CI.
+4. Build the landing page shell with hero animation and sign-up CTA.
+5. Prepare Sprint 1: auth, roles, trainer-to-client invite, client onboarding.
 
 ## Next Milestone
 
-Milestone 1: Product Requirements and Build Blueprint
+Milestone 2: working monorepo scaffold with brand applied, auth, and landing page shell
 
 Definition of done:
 
-- MVP scope is finalized.
-- Core screens are listed.
-- User flows are documented.
-- Data model is drafted.
-- Backlog is prioritized.
-- First sprint is ready for implementation.
+- Monorepo scaffold builds and deploys.
+- Brand tokens (colors, type) applied in the app.
+- Landing page shell is live with hero animation and sign-up CTA.
+- Supabase project connected with auth working end to end.
+- CI runs lint, typecheck, and build on every push.
 
 ## Key Links
 
 - Main plan: `../Training Hub Plan.md`
 - Project brain: `../Brain/README.md`
+- MVP scope: `../Brain/08-mvp-scope.md`
+- Screen inventory: `../Brain/09-screen-inventory.md`
+- Database schema: `../Brain/10-database-schema.md`
+- Brand design system: `../Brain/11-brand-design-system.md`
+- Repo guide: `../CLAUDE.md`
 - Backlog: `02-backlog.md`
 - Sprint board: `03-sprint-board.md`
 - Decision log: `04-decision-log.md`

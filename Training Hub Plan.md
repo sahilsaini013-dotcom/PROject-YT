@@ -35,6 +35,10 @@ The core promise: Training Hub helps trainers make smarter coaching decisions by
 
 ## Version 1 Experience
 
+### Public Landing Page
+
+- One-page marketing/landing page with a sign-up call to action, built in the same Next.js app.
+
 ### Trainer Dashboard
 
 - Client roster with status indicators: on track, needs review, missed sessions, ready to push, nutrition concern, recovery risk.
@@ -55,16 +59,20 @@ The core promise: Training Hub helps trainers make smarter coaching decisions by
 
 ## Architecture
 
-- Native iOS app: Swift and SwiftUI.
-- Native Android app: Kotlin and Jetpack Compose.
-- Trainer web dashboard: Next.js and TypeScript.
-- Backend: typed API service such as Node.js/NestJS.
-- Database: Postgres.
-- Realtime: WebSockets or managed realtime service for messaging and live updates.
-- Auth: email/password, magic link, Apple/Google sign-in, trainer/client role permissions.
-- Notifications: APNs, FCM, and email.
+- v1 app: Next.js 15 and TypeScript, one app serving the trainer dashboard (desktop web) and the client experience (mobile-first PWA).
+- Backend: Supabase — managed Postgres, Auth, Realtime, Storage, and Row Level Security.
+- Database: Postgres (via Supabase).
+- Realtime: Supabase Realtime for messaging and live updates.
+- Auth: Supabase Auth with email/password and magic link, trainer/client role permissions enforced through Row Level Security.
+- Hosting: Vercel.
+- Notifications: email and in-app for v1; APNs and FCM arrive later with the native apps.
 - AI layer: server-side recommendation service with stored recommendation history, source data, trainer approval state, and audit trail.
 - Wearables: Apple Health and Google Fit summaries where available.
+- Later phase, after the coaching loop is proven: native iOS app (Swift and SwiftUI) and native Android app (Kotlin and Jetpack Compose).
+
+## Brand
+
+- Dark, athletic, premium: near-black surfaces, volt-green electric accent (#C6FF00), bold type. Logo is an icon + "Training Hub" wordmark lockup; the icon works standalone as the app icon.
 
 ## Core Data Model
 
@@ -127,7 +135,7 @@ The core promise: Training Hub helps trainers make smarter coaching decisions by
 ## Assumptions
 
 - Training Hub is trainer-first, not just a solo fitness tracker.
-- Native mobile apps are required for iOS and Android.
+- Native mobile apps remain the long-term plan for iOS and Android, but v1 ships web-first: the client experience is a mobile-first PWA until the coaching loop is proven with real trainers.
 - Web dashboard is required for trainers because programming, nutrition review, and client management are easier on desktop.
 - Nutrition is a core pillar, not an optional add-on.
 - AI assists the trainer; it does not replace trainer judgment.
