@@ -61,3 +61,15 @@ Deferred to Sprint 1 (noted from review): invitation-acceptance security-definer
 **Exact next action:** check PR #3 CI → merge → rebase this branch → open Sprint 1 PR → /code-review + /security-review (auth sprint) → merge → Sprint 2 (exercise library + program builder).
 
 **Blockers:** GitHub MCP flapping (needs re-auth periodically); webhook events still arrive. DEFERRED (unchanged): cloud deploy pending credentials.
+
+### Addendum — Sprint 1 review + fixes (same session)
+
+Ran /code-review (medium, multi-agent: 3 finder angles) + /security-review on the Sprint 1 diff. Fixed before finishing:
+- **Security:** open-redirect via `next` param constrained to same-origin; latent self-promotion closed (profiles.role now immutable via trigger + pgTAP test — RLS suite 39 assertions).
+- **Correctness (real bugs):** middleware dropped refreshed-session cookies on redirect (silent logout) — now carried; middleware reads role from profiles (immutable) not user-mutable metadata; sign-out redirected off the authed route (was crashing on null user); added `/auth/callback` PKCE exchange (magic link had no callback); OTP sign-in sets shouldCreateUser:false; invite-accept falls back to sign-in for existing emails; enable_confirmations pinned false.
+- **Cleanup:** shared field/button classes + ButtonLink in ui.tsx (killed 3 CTA copies); homePathForRole + signUpMetadata helpers; null-safe roster name + tabular-nums.
+- e2e now 8 specs (added sign-out-no-crash + callback regression). All pass.
+
+**DEFERRED:** GitHub MCP is disconnected in this session, so the **Sprint 1 PR could not be opened** — branch `claude/sprint-1-auth-invites` is pushed and green locally. Open the draft PR (base main) as soon as the GitHub connector reconnects. Not blocking Sprint 2 work.
+
+**Next action:** open Sprint 1 PR when MCP returns; meanwhile build Sprint 2 (exercise library + program builder + assignment) on a new branch off main.
