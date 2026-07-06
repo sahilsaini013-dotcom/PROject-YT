@@ -190,3 +190,20 @@ for PR #6 CI, then mark ready and merge if green.
 **Exact next action:** open Sprints 1–6 PRs when GitHub MCP returns; then the Final phase — multi-agent UI audit loop, then v1 completion report.
 
 **Blockers:** GitHub MCP still down → PRs deferred. Cloud deploy deferred (creds).
+
+## 2026-07-06 — Session 2 (Final phase: UI audit loop + v1 close-out)
+
+**Phase:** GOAL.md final phase — multi-agent UI audit + completion report. All six sprint PRs (#4–#9) plus the final audit PR #10 are MERGED to main; every main-branch CI run is green.
+
+**Audit round 1 (multi-agent, local screenshots):** drove the full trainer/client loop with `scripts/audit-screenshots.mjs` (28 screenshots, desktop 1440 + mobile 390) and fanned out three vision-audit agents (brand/visual, flow/empty-states, data correctness). Verified findings fixed and merged (`e9b6809`): volume totals keep half-kilos (shared `formatKg`), `assign_program` skips exercise-less days, week-disambiguated session labels (shared `sessionLabel`), invite copy-link + emailed wording, solid workout finish bar, water steppers demoted to secondary (volt scarcity), single-point trend renders as text, empty logo-reveal band removed from the landing. Discarded four agent findings that contradicted Brain/11 (info-blue chart bars are the documented chart palette; exercise-thumbnail volt is the brand illustration art) or were artifacts of the demo script (pre-selected check-in 4s).
+**Audit rounds 2–3 (CI artifacts, both clean):** PR #10 made the screenshot pass portable, added the GOAL-required responsive lenses (mobile 360/390/430, coach 1280/1440), and uploads a `final-ui-audit` artifact from CI. Two consecutive CI audit runs (28817641394, 28818282592) were inspected with no new findings → loop is dry.
+
+**Reviews across the build:** /code-review on every sprint (criticals fixed pre-merge: trainer_clients privilege escalation, message forgery, missing API grants, silent-logout cookie loss, magic-link dead end, orphan/duplicate assignments); /security-review after Sprint 1 (open redirect fixed) and Sprint 5 (no findings).
+
+**Close-out:** release log v1.0.0 entry, sprint board, dashboard, and `12-v1-completion-report.md` are on main (report links every merged PR, all green CI runs, and both audit artifacts with digests). Sprint 3–6 PRs were co-completed with a second agent (Codex) that continued the branches during this session's container outages — its additions (workout-note persistence, bidirectional notification emails, email HTML escaping, CI SMTP env) were reviewed as part of the merged diffs.
+
+**DEFERRED (unchanged, needs the user):**
+- Cloud deploy: a paused Supabase cloud project `training-hub` (ref buqplfqxyepqtwxmrsui) exists in the connected account; restoring it was blocked by the session permission gate, and no Vercel connector is available. Deploy steps remain documented in README.
+- Draft PR #2 (Supabase MCP config) — left open intentionally.
+
+**v1 is DONE per the GOAL.md Definition of Done. Phase 2 (AI review inbox) is unblocked.**

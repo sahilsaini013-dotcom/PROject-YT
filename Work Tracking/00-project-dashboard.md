@@ -10,11 +10,11 @@ Ship a trainer-first fitness coaching platform that combines training, nutrition
 
 ## Current Phase
 
-v1 complete - final audit/bookkeeping PR #10 pending merge.
+v1 complete — all sprint PRs and the final audit/bookkeeping PR #10 are merged to main; CI green.
 
 ## Status
 
-Green: the core coaching loop is built and verified in CI. Sprints 0-6 are merged. Final UI audit round 1 passed in CI and produced the `final-ui-audit` artifact; the release docs update in PR #10 will produce the second clean audit run before merge.
+Green: the core coaching loop is built and verified in CI. Sprints 0-6 and the final audit PR #10 are merged. Two consecutive CI audit rounds produced clean `final-ui-audit` artifacts; the v1 completion report is at `Work Tracking/12-v1-completion-report.md`. Phase 2 (AI review inbox) may begin.
 
 ## Shipped v1 Scope
 
