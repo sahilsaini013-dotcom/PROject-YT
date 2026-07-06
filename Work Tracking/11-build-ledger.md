@@ -73,3 +73,22 @@ Ran /code-review (medium, multi-agent: 3 finder angles) + /security-review on th
 **DEFERRED:** GitHub MCP is disconnected in this session, so the **Sprint 1 PR could not be opened** — branch `claude/sprint-1-auth-invites` is pushed and green locally. Open the draft PR (base main) as soon as the GitHub connector reconnects. Not blocking Sprint 2 work.
 
 **Next action:** open Sprint 1 PR when MCP returns; meanwhile build Sprint 2 (exercise library + program builder + assignment) on a new branch off main.
+
+## 2026-07-06 — Session 2 (Sprint 2)
+
+**Sprint:** 2 — exercise library, program builder, assignment. Branch `claude/sprint-2-programs`, stacked on Sprint 1 (main doesn't have Sprint 1 yet — PR deferred on GitHub MCP outage).
+
+**Completed:**
+- Coach shell: `coach/layout.tsx` with nav (Roster/Programs/Exercises) + sign-out; roster rows now link to client detail.
+- Exercise library `/coach/exercises`: search + category filter chips over the 100 seeded exercises, brand category illustrations (client-filtered from a server fetch).
+- Program builder `/coach/programs` (list + create) and `/coach/programs/[id]` (full tree editor): program→weeks→days→exercises, exercise picker modal, per-slot sets/reps/RPE/rest/notes with autosave-on-blur via server actions; weeks_count kept in sync. All mutations RLS-guarded (trainer owns the tree).
+- Assignment (`assign.ts`): materializes one workout_session per program day on a weekly calendar (day D wk W → start+((W-1)*7+(D-1))), inserts a workout_assigned notification.
+- Minimal client detail `/coach/clients/[id]` (profile + assigned programs) so roster links aren't dead (full tabbed review is Sprint 5).
+- e2e `programs.spec.ts`: trainer builds a 2-week program from seeded exercises + assigns (asserts sessions land in DB); second unlinked trainer cannot see it via the app. Authoritative program-tree RLS added to pgTAP (now 46 assertions: trainer2 can't read trainer1's program/weeks/days/exercises/assignments/sessions).
+- playwright.config loads apps/web/.env.local into the runner; pgTAP profile-count assertion scoped to fixture ids (robust when e2e leaves data).
+
+**Verification:** typecheck ✓, lint ✓, build ✓ (14 routes), pgTAP 46/46 ✓, e2e 9/9 ✓, builder+library screenshots captured.
+
+**Exact next action:** open Sprint 1 + Sprint 2 PRs when GitHub MCP returns (both branches pushed, green). Then Sprint 3 (client Today + workout player + set logging + celebration).
+
+**Blockers:** GitHub MCP still disconnected → PRs deferred (send_later reminder armed). Cloud deploy still deferred pending creds.
