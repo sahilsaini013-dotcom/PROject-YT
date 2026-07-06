@@ -31,10 +31,12 @@ test.describe("landing page", () => {
     }
   });
 
-  test("coach and app shells respond", async ({ page }) => {
-    await page.goto("/coach");
-    await expect(page.getByRole("heading", { name: /coach/i })).toBeVisible();
-    await page.goto("/app");
-    await expect(page.getByRole("heading", { name: /today/i })).toBeVisible();
+  test("auth entry points respond", async ({ page }) => {
+    await page.goto("/auth/sign-in");
+    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+    await page.goto("/auth/sign-up");
+    await expect(
+      page.getByRole("heading", { name: /trainer account/i }),
+    ).toBeVisible();
   });
 });

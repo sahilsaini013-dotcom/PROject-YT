@@ -79,7 +79,7 @@ values ('ffffffff-0000-0000-0000-000000000004', '22222222-2222-2222-2222-2222222
 -- Tests
 -- ============================================================
 
-select plan(38);
+select plan(39);
 
 -- Helper: run the rest of the transaction as an authenticated stranger.
 -- (pgTAP runs inside one transaction; set_config(..., true) scopes to it.)
@@ -154,6 +154,13 @@ select throws_ok(
   $$update public.trainer_clients set client_id = '22222222-2222-2222-2222-222222222222' where id = 'aaaaaaaa-0000-0000-0000-000000000002'$$,
   'P0001', 'participants of a coaching link cannot be changed',
   'trainer_clients: cannot repoint a link at a victim client');
+
+-- ---- role self-promotion is blocked
+select test_as('44444444-4444-4444-4444-444444444444');
+select throws_ok(
+  $$update public.profiles set role = 'trainer' where id = '44444444-4444-4444-4444-444444444444'$$,
+  'P0001', 'role cannot be changed after signup',
+  'profiles: a client cannot promote themselves to trainer');
 
 -- ---- message immutability: sender (client1) cannot edit their own sent body
 select test_as('22222222-2222-2222-2222-222222222222');
