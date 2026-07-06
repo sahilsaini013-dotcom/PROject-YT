@@ -63,6 +63,50 @@ jobs:
       - name: E2E
         run: npx playwright test
 
+      - name: Final UI audit screenshots
+        run: |
+          set -euo pipefail
+          mkdir -p final-audit/screenshots
+
+          APP_PID=""
+          if ! curl -fsS http://127.0.0.1:3000 >/dev/null 2>&1; then
+            npm run start --workspace apps/web > final-audit/next-start.log 2>&1 &
+            APP_PID=$!
+          fi
+          cleanup() {
+            if [ -n "$APP_PID" ]; then
+              kill "$APP_PID" 2>/dev/null || true
+            fi
+          }
+          trap cleanup EXIT
+
+          READY=0
+          for _ in {1..60}; do
+            if curl -fsS http://127.0.0.1:3000 >/dev/null 2>&1; then
+              READY=1
+              break
+            fi
+            if [ -n "$APP_PID" ] && ! kill -0 "$APP_PID" 2>/dev/null; then
+              cat final-audit/next-start.log
+              exit 1
+            fi
+            sleep 2
+          done
+          if [ "$READY" != "1" ]; then
+            cat final-audit/next-start.log
+            exit 1
+          fi
+
+          node scripts/audit-screenshots.mjs final-audit/screenshots
+
+      - name: Upload final UI audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-ui-audit
+          path: final-audit/
+          retention-days: 14
+
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
