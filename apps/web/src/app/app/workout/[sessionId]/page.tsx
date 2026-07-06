@@ -35,7 +35,7 @@ export default async function WorkoutPage({
   const { data: existing } = await supabase
     .from("set_logs")
     .select(
-      "program_day_exercise_id, exercise_id, set_index, weight_kg, reps, rpe, substituted_exercise_id",
+      "program_day_exercise_id, exercise_id, set_index, weight_kg, reps, rpe, pain_note, substituted_exercise_id",
     )
     .eq("session_id", sessionId);
 
