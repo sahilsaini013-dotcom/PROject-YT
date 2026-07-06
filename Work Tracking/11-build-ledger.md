@@ -112,3 +112,23 @@ Ran /code-review (medium, multi-agent: 3 finder angles) + /security-review on th
 **Exact next action:** open Sprints 1–3 PRs when GitHub MCP returns. Then Sprint 4 (check-ins, nutrition targets, meal log w/ photo, water).
 
 **Blockers:** GitHub MCP still down → PRs deferred. Cloud deploy deferred.
+
+### Codex takeover review addendum
+
+Codex resumed after PR #6 existed as a draft and GitHub Actions had passed on
+`54dfa77`. Review found one Sprint 3 product bug: the workout player's
+"Substitution / note" field was local-only and did not persist to the database.
+Fixed by saving the note into the existing `set_logs.pain_note` column whenever
+sets are upserted, and by updating existing set rows when the note field blurs.
+Added e2e coverage that logs the note and asserts all three saved set rows carry
+the note.
+
+Verification after the fix: `git diff --check` passed; `npm run typecheck`
+workspace equivalent passed; `npm run lint --workspace apps/web` passed;
+`npm run build --workspace apps/web` passed. Local Supabase/Playwright e2e could
+not run in this Codex shell because Docker is unavailable on PATH and the
+Supabase CLI cannot connect to the Docker daemon. CI should rerun the full
+Supabase + Playwright suite after push.
+
+**Exact next action:** push the fix to `claude/sprint-3-workout-player`, wait
+for PR #6 CI, then mark ready and merge if green.
