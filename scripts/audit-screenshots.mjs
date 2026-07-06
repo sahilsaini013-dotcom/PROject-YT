@@ -2,13 +2,11 @@
 // viewports for the multi-agent UI audit. Run against a dev server with a
 // fresh DB. Usage: node scripts/audit-screenshots.mjs <outDir>
 import { chromium } from "@playwright/test";
-import { execSync } from "node:child_process";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 
 const OUT = process.argv[2];
 const BASE = "http://127.0.0.1:3000";
 const EXE = "/opt/pw-browsers/chromium";
-const DB = "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
 const run = Date.now();
 const trainer = `demo.coach.${run}@e2e.local`;
 const client = `demo.client.${run}@e2e.local`;
@@ -16,13 +14,20 @@ const PW = "training-hub-demo1";
 mkdirSync(OUT, { recursive: true });
 
 const DESKTOP = { width: 1440, height: 900 };
+const DESKTOP_NARROW = { width: 1280, height: 900 };
 const MOBILE = { width: 390, height: 844 };
+const MOBILE_NARROW = { width: 360, height: 780 };
+const MOBILE_WIDE = { width: 430, height: 932 };
 
-const browser = await chromium.launch({ executablePath: EXE });
+const browser = await chromium.launch({
+  executablePath: existsSync(EXE) ? EXE : undefined,
+});
+const manifest = [];
 
 async function shot(page, name) {
   await page.waitForTimeout(500);
   await page.screenshot({ path: `${OUT}/${name}.png`, fullPage: true });
+  manifest.push(name);
   console.log("shot", name);
 }
 
@@ -59,12 +64,18 @@ await cp.getByLabel(/main goal/i).fill("Build strength and stay consistent");
 await cp.getByLabel("Height (cm)").fill("180");
 await cp.getByLabel("Weight (kg)").fill("82");
 await cp.getByRole("button", { name: "Start training" }).click();
-await cp.waitForURL(new RegExp(`${BASE}/app$`.replace(/[/.]/g, "\\$&")));
+await cp.waitForURL(/\/app$/);
 await shot(cp, "22-app-today-empty");
 
-const clientId = execSync(
-  `psql "${DB}" -tAc "select id from auth.users where email = '${client}'"`,
-).toString().trim();
+await tp.goto(`${BASE}/coach`);
+const clientHref = await tp
+  .getByRole("link", { name: /Alex Rivera/ })
+  .first()
+  .getAttribute("href");
+if (!clientHref) {
+  throw new Error("Could not find the accepted client link in the coach roster");
+}
+const clientId = clientHref.split("/").pop();
 
 // Trainer builds a program
 await tp.goto(`${BASE}/coach/exercises`);
@@ -178,5 +189,52 @@ await shot(tp, "15-coach-messages");
 await tp.goto(`${BASE}/coach/notifications`);
 await shot(tp, "16-coach-notifications");
 
+// Responsive audit lenses required by GOAL.md.
+await tp.setViewportSize(DESKTOP_NARROW);
+await tp.goto(`${BASE}/coach/clients/${clientId}`);
+await shot(tp, "40-coach-overview-1280");
+await tp.goto(`${BASE}/coach/programs`);
+await shot(tp, "41-coach-programs-1280");
+await tp.setViewportSize(DESKTOP);
+await tp.goto(`${BASE}/coach/clients/${clientId}/progress`);
+await shot(tp, "42-coach-progress-1440");
+
+for (const [label, viewport] of [
+  ["360", MOBILE_NARROW],
+  ["390", MOBILE],
+  ["430", MOBILE_WIDE],
+]) {
+  await cp.setViewportSize(viewport);
+  await cp.goto(`${BASE}/app`);
+  await shot(cp, `50-app-today-${label}`);
+  await cp.goto(`${BASE}/app/nutrition`);
+  await shot(cp, `51-app-nutrition-${label}`);
+  await cp.goto(`${BASE}/app/progress`);
+  await shot(cp, `52-app-progress-${label}`);
+  await cp.goto(`${BASE}/app/messages`);
+  await shot(cp, `53-app-messages-${label}`);
+}
+
 await browser.close();
+writeFileSync(
+  `${OUT}/audit-manifest.md`,
+  [
+    "# Final UI Audit Screenshot Manifest",
+    "",
+    `Base URL: ${BASE}`,
+    `Trainer fixture: ${trainer}`,
+    `Client fixture: ${client}`,
+    "",
+    "The run drives the real trainer/client flow against Supabase:",
+    "- trainer signup, invite, and accepted client onboarding",
+    "- exercise library, program build, assignment, and targets",
+    "- client workout, summary, check-in, nutrition, progress, notifications, and messaging",
+    "- trainer review tabs, messages, notifications, and responsive coach widths",
+    "- responsive client PWA widths at 360px, 390px, and 430px",
+    "",
+    "Screenshots:",
+    ...manifest.map((name) => `- ${name}.png`),
+    "",
+  ].join("\n"),
+);
 console.log("DONE");
