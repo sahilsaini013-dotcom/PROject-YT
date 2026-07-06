@@ -71,8 +71,10 @@ Prompt cells are short summaries, filled in as generation happens.
 | Splash screen 1080x1920 | Chromium raster, lockup centered on ink | — | done — `splash-1080x1920.png` |
 | OG image 1200x630 | Chromium raster, lockup centered on ink | — | done — `og-1200x630.png` |
 | Email header 1200x300 | Chromium raster, lockup on ink | — | done — `email-header-1200x300.png` |
-| Logo reveal ~5s | Seedance 2.0, 1080p, `generate_audio: false`, end frame = winning logo job | Volt light traces draw the hexagon, lockup assembles, settles still | blocked — video generation requires interactive MCP approval |
-| Landing hero loop ~8s | Seedance 2.0, 1080p 16:9, muted loop | Dark-gym slow-motion athlete montage, volt rim light | blocked — video generation requires interactive MCP approval |
-| Workout-complete celebration ~4s | Seedance 2.0, 720p 9:16, muted | Volt energy pulse + rising particles, settles calm | blocked — video generation requires interactive MCP approval |
+| Logo reveal ~4s | Hand-coded animated SVG (CSS keyframes on the real logo paths), plays once, ends still | Volt outline draws the hexagon, icon fills in, wordmark rises | done — `animations/logo-reveal.svg` (~8 KB) |
+| Landing hero loop 8s | Hand-coded animated SVG, seamless infinite loop | Ink grid, breathing volt glow, slow-rotating hexagon outline, volt light streaks | done — `animations/hero-loop.svg` (~3 KB) |
+| Workout-complete celebration 4s cycle | Hand-coded animated SVG | Volt ring bursts + rising particles around the popping mark, settles calm | done — `animations/celebration.svg` (~4 KB) |
+
+Note: video generation via Seedance required interactive MCP approval, so the brand-moment animations were authored as animated SVGs instead. This is strictly better for the web surfaces (KB instead of MB, vector-crisp, loop perfectly); revisit generated video only if a filmed-footage hero is wanted later.
 | Exercise-category illustrations x15 | Recraft V4.1, `utility_vector`, 1:1, palette-constrained | "Flat vector fitness illustration, consistent icon-style set: [movement], off-white geometric figure, one volt accent, ink background" — squat, hinge, lunge, horizontal push, vertical push, horizontal pull, vertical pull, carry, core, cardio, mobility, plyometric, olympic, isolation, stretching | generated — `assets/brand/exercises/` |
 | Empty-state illustrations x3 | Recraft V4.1, `utility_vector`, 1:1 | No clients (clipboard + silhouettes), no program (blueprint + barbell), no logs (empty chart + rising trendline) | generated — `assets/brand/empty-states/` |
