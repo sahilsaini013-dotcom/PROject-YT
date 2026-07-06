@@ -44,9 +44,18 @@ export async function sendEmail(opts: {
   }
 }
 
+export function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function emailShell(title: string, body: string) {
   return `<div style="background:#0B0D10;color:#F5F7FA;font-family:Inter,system-ui,sans-serif;padding:32px">
-  <h1 style="color:#C6FF00;font-size:20px;margin:0 0 16px">${title}</h1>
+  <h1 style="color:#C6FF00;font-size:20px;margin:0 0 16px">${escapeHtml(title)}</h1>
   <div style="font-size:15px;line-height:1.6;color:#F5F7FA">${body}</div>
   <p style="margin-top:24px;color:#8A94A3;font-size:12px">Training Hub — coach smarter, train harder.</p>
 </div>`;

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { emailShell, sendEmail } from "@/lib/email";
+import { emailShell, escapeHtml, sendEmail } from "@/lib/email";
 
 export type InviteResult =
   | { ok: true; inviteUrl: string; email: string }
@@ -47,12 +47,13 @@ export async function inviteClient(
     .select("full_name")
     .eq("id", user!.id)
     .single();
+  const trainerName = trainer?.full_name ?? "Your coach";
   await sendEmail({
     to: email,
-    subject: `${trainer?.full_name ?? "Your coach"} invited you to Training Hub`,
+    subject: `${trainerName} invited you to Training Hub`,
     html: emailShell(
       "You've been invited",
-      `${trainer?.full_name ?? "Your coach"} wants to coach you on Training Hub.
+      `${escapeHtml(trainerName)} wants to coach you on Training Hub.
        <p style="margin-top:16px"><a href="${inviteUrl}" style="background:#C6FF00;color:#0B0D10;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Accept invite</a></p>`,
     ),
   });

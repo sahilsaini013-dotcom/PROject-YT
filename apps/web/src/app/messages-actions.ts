@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { emailShell, sendEmail } from "@/lib/email";
+import { emailShell, escapeHtml, sendEmail } from "@/lib/email";
 import type { ChatMessage } from "@/components/chat";
 
 // Sends a message and emails the recipient. Insert still fires the Realtime
@@ -47,13 +47,14 @@ export async function sendMessage(
     });
     const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
     const path = thread.trainer_id === recipient ? "/coach/messages" : "/app/messages";
+    const senderName = sender?.full_name ?? "Training Hub";
     if (email) {
       await sendEmail({
         to: email,
-        subject: `New message from ${sender?.full_name ?? "Training Hub"}`,
+        subject: `New message from ${senderName}`,
         html: emailShell(
-          `Message from ${sender?.full_name ?? "your coach"}`,
-          `${trimmed.slice(0, 200)}
+          `Message from ${senderName}`,
+          `${escapeHtml(trimmed.slice(0, 200))}
            <p style="margin-top:16px"><a href="${site}${path}" style="background:#C6FF00;color:#0B0D10;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Reply</a></p>`,
         ),
       });

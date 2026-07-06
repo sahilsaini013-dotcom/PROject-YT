@@ -10,7 +10,9 @@ as $$
 declare
   _email text;
 begin
-  if _user <> auth.uid() and not public.is_linked_trainer(auth.uid(), _user) then
+  if _user <> auth.uid()
+     and not public.is_linked_trainer(auth.uid(), _user)
+     and not public.is_linked_trainer(_user, auth.uid()) then
     raise exception 'not authorized to resolve this email';
   end if;
   select email into _email from auth.users where id = _user;

@@ -59,6 +59,11 @@ test("notifications fire in-app and by email for invite, assignment, and message
   )
     .toString()
     .trim();
+  const trainerId = execSync(
+    `psql "${DB_URL}" -tAc "select id from auth.users where email = '${trainerEmail}'"`,
+  )
+    .toString()
+    .trim();
 
   // Assign a program → in-app notification + email to client
   await tp.goto("/coach/programs");
@@ -113,6 +118,28 @@ test("notifications fire in-app and by email for invite, assignment, and message
   await expect
     .poll(() => mailpitCount(clientEmail), { timeout: 10000 })
     .toBeGreaterThanOrEqual(3);
+
+  // Reverse direction: client messages coach -> trainer gets notification + email.
+  await cp.goto("/app/messages");
+  await cp.getByLabel("Message").fill("Thanks coach!");
+  await cp.getByRole("button", { name: "Send" }).click();
+
+  await expect
+    .poll(
+      () =>
+        Number(
+          execSync(
+            `psql "${DB_URL}" -tAc "select count(*) from public.notifications where user_id = '${trainerId}' and kind = 'message_received'"`,
+          )
+            .toString()
+            .trim(),
+        ),
+      { timeout: 10000 },
+    )
+    .toBeGreaterThan(0);
+  await expect
+    .poll(() => mailpitCount(trainerEmail), { timeout: 10000 })
+    .toBeGreaterThan(0);
 
   await tctx.close();
   await cctx.close();
