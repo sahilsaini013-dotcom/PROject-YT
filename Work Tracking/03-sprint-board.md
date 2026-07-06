@@ -10,15 +10,11 @@ Dates: started 2026-07-06
 
 | ID | Task | Owner | Notes |
 | --- | --- | --- | --- |
-| S0-007 | Scaffold monorepo | TBD | Docs at root, `apps/web` (Next.js 15 + TypeScript + Tailwind + shadcn/ui), `supabase/`, `packages/shared`. See DEC-011. |
-| S0-008 | Set up CI | TBD | Lint, typecheck, build on every push. |
-| S0-009 | Build landing page shell | TBD | One-page marketing site with hero animation and sign-up CTA. See DEC-013. |
 
 ## In Progress
 
 | ID | Task | Owner | Notes |
 | --- | --- | --- | --- |
-| S0-006 | Generate logo and brand assets | Claude | Icon + "Training Hub" wordmark lockup via Higgsfield (Recraft V4.1 vectors, Seedance 2.0 animations). See DEC-012. |
 
 ## Review
 
@@ -29,6 +25,10 @@ Dates: started 2026-07-06
 
 | ID | Task | Owner | Notes |
 | --- | --- | --- | --- |
+| S0-006 | Generate logo and brand assets | Claude | Logo suite, icons, 18 illustrations, 3 animated SVGs in `assets/brand/` (PR #1). |
+| S0-007 | Scaffold monorepo | Claude | npm workspaces: `apps/web` (Next.js 15 + TS + Tailwind v4), `packages/shared`, `supabase/` with full 26-table migration + RLS + 100-exercise seed. |
+| S0-008 | Set up CI | Claude | GitHub Actions: typecheck, lint, supabase db reset, build, Playwright e2e. |
+| S0-009 | Build landing page shell | Claude | `/` with hero-loop + logo-reveal animations, brand tokens, volt CTA; `/coach` + `/app` shells; installable PWA manifest. |
 | S0-D01 | Create main product plan | Codex | Saved in Project YT. |
 | S0-D02 | Create project brain | Codex | Saved in Project YT/Brain. |
 | S0-000 | Create tracking system | Codex | Initial tracking folder and docs. |

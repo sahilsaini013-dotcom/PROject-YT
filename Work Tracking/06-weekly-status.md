@@ -1,5 +1,32 @@
 # Weekly Status
 
+## Week of 2026-07-06 (Sprint 0)
+
+### Overall Status
+
+Green.
+
+### Completed
+
+- Merged execution kickoff PR #1: decisions DEC-007..013, blueprint docs (MVP scope, screens, schema, brand system), full brand asset suite.
+- Sprint 0 built: monorepo (Next.js 15 `apps/web`, `packages/shared`, `supabase/`), initial migration implementing all 26 tables with RLS + storage buckets, 100-exercise seed, brand Tailwind theme with self-hosted Archivo/Inter, installable PWA manifest, landing page with brand animations, Playwright e2e, GitHub Actions CI.
+
+### In Progress
+
+- Sprint 0 PR (scaffold) heading to review/merge.
+
+### Next
+
+- Sprint 1: auth (email/password + magic link), roles, trainer→client invite with emailed token, client onboarding.
+
+### Risks
+
+- No cloud Supabase/Vercel credentials yet — local + CI stacks cover development; deploy deferred without blocking v1.
+
+### Decisions Needed
+
+- None blocking. Cloud credentials wanted eventually (see Sprint 0 PR).
+
 ## Week of 2026-07-05
 
 ### Overall Status

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920">
+<style>
+  .ring { fill:none; stroke:#C6FF00; transform-origin:540px 960px; opacity:0;
+    animation: ring 4s cubic-bezier(.17,.67,.35,1) infinite; }
+  .ring2 { animation-delay:.18s; stroke:#F5F7FA; }
+  .p { opacity:0; animation: fly 4s cubic-bezier(.2,.7,.3,1) infinite; }
+  .mark { transform-origin:549.4px 663.7px; transform-box:fill-box; animation: pop 4s cubic-bezier(.34,1.56,.64,1) infinite; }
+  @keyframes ring { 0% { opacity:0; stroke-width:26; transform:scale(.12); }
+    8% { opacity:.9; } 40% { opacity:0; stroke-width:2; transform:scale(1); } 100% { opacity:0; } }
+  @keyframes fly { 0% { opacity:0; transform:translate(0,0) scale(.4); }
+    6% { opacity:1; } 42% { opacity:0; transform:translate(var(--dx),var(--dy)) scale(1); } 100% { opacity:0; } }
+  @keyframes pop { 0% { transform:scale(.6); opacity:0; } 10% { transform:scale(1.08); opacity:1; }
+    16% { transform:scale(1); } 88% { transform:scale(1); opacity:1; } 100% { transform:scale(.6); opacity:0; } }
+</style>
+<rect width="1080" height="1920" fill="#0B0D10"/>
+<circle class="ring" cx="540" cy="960" r="420"/>
+<circle class="ring ring2" cx="540" cy="960" r="330"/>
+<circle class="p" cx="540" cy="980" r="11" fill="#F5F7FA" style="--dx:-247px; --dy:-213px; animation-delay:0.10s"/><circle class="p" cx="540" cy="980" r="7" fill="#C6FF00" style="--dx:-216px; --dy:-288px; animation-delay:0.17s"/><circle class="p" cx="540" cy="980" r="7" fill="#C6FF00" style="--dx:-167px; --dy:-350px; animation-delay:0.24s"/><circle class="p" cx="540" cy="980" r="11" fill="#C6FF00" style="--dx:-106px; --dy:-394px; animation-delay:0.31s"/><circle class="p" cx="540" cy="980" r="7" fill="#F5F7FA" style="--dx:-36px; --dy:-417px; animation-delay:0.38s"/><circle class="p" cx="540" cy="980" r="7" fill="#C6FF00" style="--dx:36px; --dy:-417px; animation-delay:0.10s"/><circle class="p" cx="540" cy="980" r="11" fill="#C6FF00" style="--dx:106px; --dy:-394px; animation-delay:0.17s"/><circle class="p" cx="540" cy="980" r="7" fill="#C6FF00" style="--dx:167px; --dy:-350px; animation-delay:0.24s"/><circle class="p" cx="540" cy="980" r="7" fill="#F5F7FA" style="--dx:216px; --dy:-288px; animation-delay:0.31s"/><circle class="p" cx="540" cy="980" r="11" fill="#C6FF00" style="--dx:247px; --dy:-213px; animation-delay:0.38s"/>
+<g transform="translate(540 960) scale(2.6) translate(-549.4 -663.7)"><g class="mark"><path d="M 549.152 557.397 C 580.37 574.924 610.763 591.474 641.708 609.659 C 641.547 632.971 641.585 656.284 641.823 679.596 C 628.906 686.457 610.031 697 597.779 704.897 L 597.851 649.642 C 606.591 649.685 615.33 649.55 624.064 649.235 C 605.482 635.551 570.246 613.582 549.999 601.309 C 528.564 614.09 496.711 635.208 475.585 649.254 C 484.643 649.422 494.016 649.321 503.104 649.347 L 503.635 743.194 C 488.843 736.129 471.386 725.905 456.794 717.797 L 456.877 609.659 C 483.677 592.958 520.847 573.468 549.152 557.397 z" fill="rgb(245,247,250)"/><path d="M 597.779 704.897 C 610.031 697 628.906 686.457 641.823 679.596 C 641.962 692.356 642.028 705.116 642.021 717.876 C 611.292 734.972 579.792 752.458 549.406 770.091 C 538.722 764.171 527.103 758.031 516.978 751.335 C 540.721 735.686 572.568 719.744 597.779 704.897 z" fill="rgb(198,255,0)"/></g></g>
+</svg>
