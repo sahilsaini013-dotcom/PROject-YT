@@ -112,3 +112,23 @@ Ran /code-review (medium, multi-agent: 3 finder angles) + /security-review on th
 **Exact next action:** open Sprints 1–3 PRs when GitHub MCP returns. Then Sprint 4 (check-ins, nutrition targets, meal log w/ photo, water).
 
 **Blockers:** GitHub MCP still down → PRs deferred. Cloud deploy deferred.
+
+## 2026-07-06 — Session 2 (Sprint 4)
+
+**Sprint:** 4 — check-ins, nutrition targets, meal log, water. Branch `claude/sprint-4-recovery-nutrition` (stacked on Sprint 3).
+
+**Completed:**
+- Client PWA bottom nav via `app/(tabs)/` route group (Today/Check-in/Nutrition/Progress); Today, workout, onboarding restructured accordingly.
+- Daily check-in `/app/check-in`: 1–5 pill scales (sleep/soreness/energy/mood/motivation/stress) + hours + pain/comment; upsert on (client_id, checked_in_on) → one per day enforced (DB unique + UI "already checked in, updating").
+- Nutrition `/app/nutrition`: trainer targets vs consumed (calories/protein bars), water tracker with ±250ml upsert on (client_id, logged_on) and progress bar vs target, meal logging (title/notes/optional macros/photo). Meal photos upload client-side to the private `meal-photos` bucket ({client_id}/{yyyy-mm}/{meal_id}.ext); displayed via server-signed URLs.
+- Coach targets `/coach/clients/[id]/nutrition/targets`: sets calories/protein/carbs/fat/water (+guidance), inserts a new row keeping history; linked from client detail.
+- Progress `/app/progress`: PR list (full trends are Sprint 6).
+- Today nudges to the daily check-in when not yet done.
+- next.config: Supabase host added to image remotePatterns for signed photo URLs.
+- e2e `nutrition.spec.ts`: check-in (asserts one row), meal+photo (asserts meal_photos row, asserts the private bucket rejects public access), water vs target (polls DB for the async upsert).
+
+**Verification:** typecheck ✓, lint ✓, build ✓ (17 routes), pgTAP 46/46 ✓, e2e 11/11 ✓.
+
+**Exact next action:** open Sprints 1–4 PRs when GitHub MCP returns. Then Sprint 5 (trainer review tabs + Realtime messaging; /security-review after).
+
+**Blockers:** GitHub MCP still down → PRs deferred. Cloud deploy deferred.

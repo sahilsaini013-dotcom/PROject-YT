@@ -41,7 +41,15 @@ export default async function ClientProfilePage({
         >
           ← Roster
         </Link>
-        <h1 className="mt-2 text-3xl font-bold">{profile.full_name}</h1>
+        <div className="mt-2 flex items-center justify-between gap-4">
+          <h1 className="text-3xl font-bold">{profile.full_name}</h1>
+          <Link
+            href={`/coach/clients/${id}/nutrition/targets`}
+            className="rounded-(--radius-control) border border-border px-4 py-2 text-sm font-medium text-text transition-colors hover:border-text-muted"
+          >
+            Set nutrition targets
+          </Link>
+        </div>
       </div>
 
       <Card>
