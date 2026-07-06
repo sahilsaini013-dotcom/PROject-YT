@@ -106,10 +106,20 @@ export default async function ProgressPage() {
                     top {Math.max(...trend.map((p) => p.y))} kg
                   </span>
                 </div>
-                <LineChart points={trend} />
-                <p className="mt-1 text-xs text-text-muted">
-                  Heaviest set per day
-                </p>
+                {trend.length >= 2 ? (
+                  <>
+                    <LineChart points={trend} />
+                    <p className="mt-1 text-xs text-text-muted">
+                      Heaviest set per day
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-text-muted">
+                    Logged{" "}
+                    <span className="tnum">{trend[0].y}</span> kg. Train this a
+                    few more times to see your trend line.
+                  </p>
+                )}
               </Card>
             )}
 

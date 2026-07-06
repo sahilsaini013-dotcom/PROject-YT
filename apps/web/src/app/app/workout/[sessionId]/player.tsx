@@ -154,8 +154,8 @@ export function WorkoutPlayer({
         </div>
       )}
 
-      {/* Finish CTA */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-ink/95 px-5 py-3 backdrop-blur">
+      {/* Finish CTA — solid ink so content reads as passing behind it */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-ink px-5 py-3">
         <div className="mx-auto max-w-md space-y-2">
           {error && <ErrorText>{error}</ErrorText>}
           <Button onClick={finish} disabled={finishing} className="w-full">

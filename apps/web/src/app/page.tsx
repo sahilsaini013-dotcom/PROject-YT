@@ -93,16 +93,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Logo reveal — brand moment between hero and features */}
-      <section className="mx-auto max-w-6xl px-6 py-8" aria-hidden="true">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/brand/animations/logo-reveal.svg"
-          alt=""
-          className="mx-auto w-full max-w-2xl rounded-(--radius-card) border border-border"
-        />
-      </section>
-
       {/* Features */}
       <section className="mx-auto max-w-6xl px-6 py-16">
         <h2 className="text-3xl font-bold md:text-4xl">

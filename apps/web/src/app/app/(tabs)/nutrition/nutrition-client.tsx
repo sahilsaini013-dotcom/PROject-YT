@@ -116,6 +116,7 @@ export function NutritionClient({
             −{WATER_STEP} ml
           </Button>
           <Button
+            variant="secondary"
             onClick={() => adjustWater(WATER_STEP)}
             disabled={busyWater}
             className="flex-1"

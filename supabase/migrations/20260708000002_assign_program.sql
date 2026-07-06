@@ -39,16 +39,21 @@ begin
   values (_program_id, _client_id, _trainer, _start_date, _notes)
   returning id into _assignment_id;
 
+  -- Only schedule days that actually have exercises — an empty day would
+  -- otherwise become a workout with nothing to do.
   insert into workout_sessions (assignment_id, client_id, program_day_id, scheduled_date)
   select _assignment_id, _client_id, d.id,
          _start_date + ((w.week_index - 1) * 7 + (d.day_index - 1))
   from program_weeks w
   join program_days d on d.week_id = w.id
-  where w.program_id = _program_id;
+  where w.program_id = _program_id
+    and exists (
+      select 1 from program_day_exercises pde where pde.day_id = d.id
+    );
 
   get diagnostics _count = row_count;
   if _count = 0 then
-    raise exception 'add at least one day before assigning';
+    raise exception 'add exercises to at least one day before assigning';
   end if;
 
   insert into notifications (user_id, kind, title, body, link_path)

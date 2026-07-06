@@ -6,7 +6,7 @@ export default function TabsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-ink pb-20">
+    <div className="min-h-screen bg-ink pb-24">
       {children}
       <ClientTabBar />
     </div>

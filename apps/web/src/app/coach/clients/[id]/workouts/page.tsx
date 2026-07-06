@@ -1,3 +1,4 @@
+import { formatKg, sessionLabel } from "@training-hub/shared";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui";
 
@@ -15,7 +16,7 @@ export default async function ClientWorkouts({
     .from("workout_sessions")
     .select(
       `id, scheduled_date, status, session_rpe, completed_at,
-       program_day:program_days(name),
+       program_day:program_days(name, week:program_weeks(week_index)),
        set_logs(weight_kg, reps, is_pr, exercise:exercises!set_logs_exercise_id_fkey(name))`,
     )
     .eq("client_id", id)
@@ -38,7 +39,10 @@ export default async function ClientWorkouts({
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-bold">
-                  {s.program_day?.name ?? "Workout"}
+                  {sessionLabel(
+                    s.program_day?.week?.week_index,
+                    s.program_day?.name,
+                  )}
                 </h3>
                 <p className="tnum text-xs text-text-muted">
                   {new Date(`${s.scheduled_date}T00:00:00`).toLocaleDateString(
@@ -70,7 +74,7 @@ export default async function ClientWorkouts({
                   ))}
                 </ul>
                 <p className="tnum mt-3 text-xs text-text-muted">
-                  Volume {Math.round(volume)} kg
+                  Volume {formatKg(volume)} kg
                   {s.session_rpe ? ` · session RPE ${s.session_rpe}` : ""}
                 </p>
               </>
