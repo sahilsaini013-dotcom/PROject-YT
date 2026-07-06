@@ -92,3 +92,23 @@ Ran /code-review (medium, multi-agent: 3 finder angles) + /security-review on th
 **Exact next action:** open Sprint 1 + Sprint 2 PRs when GitHub MCP returns (both branches pushed, green). Then Sprint 3 (client Today + workout player + set logging + celebration).
 
 **Blockers:** GitHub MCP still disconnected → PRs deferred (send_later reminder armed). Cloud deploy still deferred pending creds.
+
+## 2026-07-06 — Session 2 (Sprint 3)
+
+**Sprint:** 3 — client Today, workout player, session summary. Branch `claude/sprint-3-workout-player` (stacked on Sprint 2).
+
+**Completed:**
+- Migrations: `complete_workout_session` RPC (security definer — recomputes weight + Epley e1rm PRs from set_logs, writes personal_records which clients can't insert directly, flags one PR set/exercise, marks session done); `set_logs_slot_uniq` index for upsert; `assign_program` RPC (atomic assignment — validates ownership+roster link, blocks duplicate active assignment, materializes sessions + notification in one txn — fixes two Sprint 2 review findings: duplicate assign + orphan rows).
+- Client Today `/app`: real — today's due session (volt CTA) + "coming up" list, timezone-aware "today".
+- Workout player `/app/workout/[sessionId]`: per-exercise set logging (weight/reps/RPE, upsert-on-blur), rest timer bar, substitution/note field, session RPE + notes; marks in_progress on mount; Complete → summary.
+- Session summary `/app/workout/[sessionId]/summary`: celebration.svg, sets/volume/PR stat tiles (tabular), PR list, client notes.
+- Sprint 2 review fixes applied: assignment via atomic RPC; exercise-picker "showing N of M" hint.
+- e2e `workout.spec.ts`: client completes assigned workout, logs 3 sets (asserts 3 rows in set_logs), PR detected (personal_records > 0), session drops off Today. RLS suite still 46/46.
+
+**Design note:** the client-side "Workout complete" overlay was removed — completeSession's revalidation re-ran the workout server component which redirects completed sessions to /summary, so the summary page (which already has the celebration) is the single post-workout screen.
+
+**Verification:** typecheck ✓, lint ✓, build ✓, pgTAP 46/46 ✓, e2e 10/10 ✓.
+
+**Exact next action:** open Sprints 1–3 PRs when GitHub MCP returns. Then Sprint 4 (check-ins, nutrition targets, meal log w/ photo, water).
+
+**Blockers:** GitHub MCP still down → PRs deferred. Cloud deploy deferred.

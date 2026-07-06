@@ -317,9 +317,10 @@ function ExercisePicker({
   onClose: () => void;
 }) {
   const [q, setQ] = useState("");
-  const filtered = exercises
-    .filter((e) => e.name.toLowerCase().includes(q.trim().toLowerCase()))
-    .slice(0, 40);
+  const matches = exercises.filter((e) =>
+    e.name.toLowerCase().includes(q.trim().toLowerCase()),
+  );
+  const filtered = matches.slice(0, 40);
 
   return (
     <div
@@ -348,6 +349,12 @@ function ExercisePicker({
           onChange={(e) => setQ(e.target.value)}
           aria-label="Search exercises"
         />
+        {matches.length > filtered.length && (
+          <p className="mt-2 text-xs text-text-muted">
+            Showing {filtered.length} of {matches.length} — keep typing to
+            narrow.
+          </p>
+        )}
         <ul className="mt-3 max-h-72 overflow-y-auto">
           {filtered.map((e) => (
             <li key={e.id}>
