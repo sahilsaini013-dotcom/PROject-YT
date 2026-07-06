@@ -8,6 +8,7 @@ const nav = [
   { href: "/coach", label: "Roster" },
   { href: "/coach/programs", label: "Programs" },
   { href: "/coach/exercises", label: "Exercises" },
+  { href: "/coach/messages", label: "Messages" },
 ];
 
 export default async function CoachLayout({

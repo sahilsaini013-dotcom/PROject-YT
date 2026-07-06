@@ -20,6 +20,11 @@ const tabs = [
     label: "Progress",
     icon: "M4 19V5M4 19h16M8 15l3-4 3 3 4-6",
   },
+  {
+    href: "/app/messages",
+    label: "Coach",
+    icon: "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z",
+  },
 ];
 
 export function ClientTabBar() {
