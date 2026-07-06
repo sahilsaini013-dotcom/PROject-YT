@@ -130,3 +130,21 @@ revoke execute on function public.get_invitation(text) from public;
 grant execute on function public.create_invitation(text) to authenticated;
 grant execute on function public.accept_invitation(text) to authenticated;
 grant execute on function public.get_invitation(text) to anon, authenticated;
+
+-- Role is fixed at signup (Brain/10): block self-service role changes,
+-- which would otherwise let a client promote themselves to trainer.
+create function public.enforce_profile_role_immutable()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.role is distinct from old.role then
+    raise exception 'role cannot be changed after signup';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger enforce_profile_role_immutable
+  before update on public.profiles
+  for each row execute function public.enforce_profile_role_immutable();
