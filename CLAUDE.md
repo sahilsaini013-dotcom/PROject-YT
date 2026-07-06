@@ -4,6 +4,7 @@ Training Hub is a trainer-first coaching platform: personal trainers program, mo
 
 ## Doc Map
 
+- `GOAL.md` — the standing goal prompt: mission, sprint loop, verification protocol, and the executable Definition of Done for v1. If asked to "build the app", execute this file.
 - `START HERE.md` — how the repo is organized.
 - `Training Hub Plan.md` — big-picture product plan.
 - `Brain/` — product truth. Key files:
