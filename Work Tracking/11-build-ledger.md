@@ -148,3 +148,7 @@ Ran /code-review (medium, multi-agent: 3 finder angles) + /security-review on th
 **Exact next action:** run /security-review (messaging + storage); open Sprints 1–5 PRs when GitHub MCP returns; then Sprint 6 (progress trends, notifications, landing final, polish).
 
 **Blockers:** GitHub MCP still down → PRs deferred. Cloud deploy deferred.
+
+### Sprint 5 security review
+
+/security-review (messaging + storage) — no exploitable findings. Realtime postgres_changes is RLS-filtered per-subscriber (client thread_id filter is not the boundary); notify_on_message definer trigger safe (recipient derived from thread, values not concatenated); message send/read gated by RLS + immutability trigger; review tabs gated by is_linked_trainer; no service-role in app code.
