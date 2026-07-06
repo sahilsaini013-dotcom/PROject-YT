@@ -55,6 +55,7 @@ Links:
 | Sprint 5 / PR #8 | https://github.com/sahilsaini013-dotcom/PROject-YT/actions/runs/28815633691 | Passed |
 | Sprint 6 / PR #9 | https://github.com/sahilsaini013-dotcom/PROject-YT/actions/runs/28816971407 | Passed |
 | Final audit round 1 / PR #10 | https://github.com/sahilsaini013-dotcom/PROject-YT/actions/runs/28817641394 | Passed |
+| Final audit round 2 / PR #10 | https://github.com/sahilsaini013-dotcom/PROject-YT/actions/runs/28818282592 | Passed |
 
 The CI suite includes typecheck, lint, Supabase start, migration replay, pgTAP negative RLS tests, build, Playwright e2e, axe accessibility coverage, Mailpit email notification assertions, and final UI audit screenshots.
 
@@ -66,7 +67,13 @@ Round 1 ran in GitHub Actions on PR #10 and uploaded artifact `final-ui-audit`:
 - Artifact id: `8119540516`
 - Digest: `sha256:f796c4dc27a0c2c2ce324d2648335d892390cf2249032acf759ffd115b3c0192`
 
-Screenshots inspected:
+Round 2 ran after release bookkeeping updates and uploaded a second `final-ui-audit` artifact:
+
+- Run: https://github.com/sahilsaini013-dotcom/PROject-YT/actions/runs/28818282592
+- Artifact id: `8119792671`
+- Digest: `sha256:b53e4e9f2bf5d0937755a5cc59f12dbe7c3006bcdaa83b9b2bae50fa77e68a3f`
+
+Screenshots inspected across the two rounds:
 
 - Desktop coach/landing/auth flow at 1440px.
 - Coach overview/program/progress at 1280px and 1440px.
@@ -75,12 +82,10 @@ Screenshots inspected:
 
 Findings:
 
-- No release-blocking visual, responsive, data correctness, or blank-screen issues found.
+- No release-blocking visual, responsive, data correctness, or blank-screen issues found in either round.
 - Bottom navigation remains reachable on mobile widths.
 - Trainer review tabs show real workout, check-in, nutrition, progress, and message data.
 - Email/in-app notification paths are covered by the PR #9 and PR #10 CI runs.
-
-Round 2 is the docs-update CI run on PR #10. If it remains green and produces a clean final audit artifact, PR #10 can merge and v1 is complete on main.
 
 ## Known Residuals
 
