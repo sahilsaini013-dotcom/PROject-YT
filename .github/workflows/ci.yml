@@ -50,7 +50,12 @@ jobs:
         run: npm run build
 
       - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+        # Verbose + one retry: browser CDN downloads are occasionally flaky,
+        # and a silent exit 1 here previously gave nothing to debug.
+        run: |
+          set -x
+          npx playwright install-deps chromium
+          npx playwright install chromium || (sleep 10 && npx playwright install chromium)
 
       - name: E2E
         run: npx playwright test
