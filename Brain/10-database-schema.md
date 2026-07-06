@@ -500,6 +500,18 @@ create policy "trainer_write_nutrition_targets" on nutrition_targets
 - Storage RLS policies mirror the table invariant: client matches `storage.foldername(name)[1] = auth.uid()::text`; trainer access via the same `trainer_clients` exists-check.
 - The app serves photos through short-lived signed URLs; nothing sensitive is publicly addressable.
 
+## Backend functions & triggers (Sprints 1–6)
+
+Security-definer RPCs (the privileged write paths):
+- `create_invitation`, `get_invitation`, `accept_invitation` — invitation lifecycle.
+- `assign_program(program, client, start_date, notes)` — atomic assignment: validates ownership + active link, blocks duplicate active assignment, materializes one `workout_sessions` row per program day (day D of week W → start_date + ((W-1)*7 + (D-1))), writes the workout_assigned notification.
+- `complete_workout_session(session, rpe, notes)` — recomputes weight + Epley e1rm PRs from `set_logs`, inserts `personal_records` (clients can't insert them directly), flags the PR set, marks the session done.
+- `email_for_user(user)` — resolves an auth email for notification emails; guarded to self or an actively-linked client only.
+
+Triggers: `handle_new_user` (profile on signup), `enforce_trainer_clients_transitions` (immutable participants; invited→active only inside the accept RPC), `enforce_message_update` (messages immutable except read_at, settable only by the recipient), `enforce_profile_role_immutable` (role fixed at signup), `notify_on_message` (message_received notification to the recipient). `messages` is on the `supabase_realtime` publication (RLS-filtered per subscriber).
+
+Notifications fire (in-app rows + email via the app's SMTP transport — Mailpit in dev/CI) for invite, workout_assigned, and message_received.
+
 ## Deferred Objects
 
 Everything from `05-data-model-notes.md` not modeled above, and how it attaches later. None of these block v1.

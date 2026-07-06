@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ButtonLink, Card } from "@/components/ui";
 
@@ -53,6 +54,11 @@ export default async function ClientToday() {
     .eq("checked_in_on", today)
     .maybeSingle();
 
+  const { count: unread } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .is("read_at", null);
+
   return (
     <main className="px-6 py-10">
       <div className="mx-auto max-w-md space-y-6">
@@ -61,7 +67,30 @@ export default async function ClientToday() {
             <p className="text-sm text-text-muted">Today</p>
             <h1 className="text-2xl font-bold">Hey {firstName}</h1>
           </div>
-          <Image src="/brand/icon.svg" alt="" width={40} height={40} />
+          <Link
+            href="/app/notifications"
+            aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`}
+            className="relative text-text-muted transition-colors hover:text-text"
+          >
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0" />
+            </svg>
+            {unread ? (
+              <span className="tnum absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-ink">
+                {unread}
+              </span>
+            ) : null}
+          </Link>
         </header>
 
         {!clientProfile && (

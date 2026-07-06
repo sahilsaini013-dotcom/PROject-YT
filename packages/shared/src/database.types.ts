@@ -1317,6 +1317,7 @@ export type Database = {
         }[]
       }
       day_program: { Args: { _day: string }; Returns: string }
+      email_for_user: { Args: { _user: string }; Returns: string }
       get_invitation: {
         Args: { _token: string }
         Returns: {

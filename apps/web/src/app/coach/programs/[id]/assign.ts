@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { emailShell, sendEmail } from "@/lib/email";
 
 export type AssignResult =
   | { ok: true; sessions: number; clientId: string }
@@ -32,6 +33,29 @@ export async function assignProgram(
 
   if (error) {
     return { ok: false, error: error.message };
+  }
+
+  // Email the client that a program is waiting (in-app notification is
+  // written inside the assign_program RPC).
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const { data: client } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", clientId)
+    .single();
+  const { data: email } = await supabase.rpc("email_for_user", {
+    _user: clientId,
+  });
+  if (email) {
+    await sendEmail({
+      to: email,
+      subject: "Your coach assigned you a new program",
+      html: emailShell(
+        `Time to train${client?.full_name ? `, ${client.full_name.split(" ")[0]}` : ""}`,
+        `Your coach just assigned you a new training program.
+         <p style="margin-top:16px"><a href="${site}/app" style="background:#C6FF00;color:#0B0D10;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Open Today</a></p>`,
+      ),
+    });
   }
 
   revalidatePath(`/coach/programs/${programId}`);

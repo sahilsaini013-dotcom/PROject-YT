@@ -132,7 +132,7 @@ function SignInForm() {
 
       <p className="mt-6 text-center text-sm text-text-muted">
         Coaching clients?{" "}
-        <Link href="/auth/sign-up" className="text-text underline-offset-4 hover:underline">
+        <Link href="/auth/sign-up" className="text-text underline underline-offset-4">
           Create a trainer account
         </Link>
       </p>

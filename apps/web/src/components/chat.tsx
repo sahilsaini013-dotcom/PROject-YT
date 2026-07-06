@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { sendMessage } from "@/app/messages-actions";
 import { Button } from "@/components/ui";
 
 export type ChatMessage = {
@@ -79,17 +80,14 @@ export function Chat({
     if (!body) return;
     setSending(true);
     setDraft("");
-    const { data, error } = await supabase.current
-      .from("messages")
-      .insert({ thread_id: threadId, sender_id: meId, body })
-      .select("id, sender_id, body, created_at")
-      .single();
+    const res = await sendMessage(threadId, body);
     setSending(false);
-    if (!error && data) {
+    if (res.ok && res.message) {
+      const m = res.message;
       setMessages((prev) =>
-        prev.some((x) => x.id === data.id) ? prev : [...prev, data],
+        prev.some((x) => x.id === m.id) ? prev : [...prev, m],
       );
-    } else if (error) {
+    } else {
       setDraft(body);
     }
   }
