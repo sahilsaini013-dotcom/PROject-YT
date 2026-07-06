@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* Training Hub brand tokens — source of truth: Brain/11-brand-design-system.md.
+   Defined once in @theme: Tailwind emits them as CSS vars (--color-*) and
+   generates the matching utilities. */
+@theme {
+  --color-ink: #0b0d10;
+  --color-surface: #15181d;
+  --color-surface-raised: #1d2127;
+  --color-border: #2a2f37;
+  --color-text: #f5f7fa;
+  --color-text-muted: #8a94a3;
+  --color-accent: #c6ff00;
+  --color-accent-pressed: #a8d400;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #60a5fa;
+
+  --radius-card: 12px;
+  --radius-control: 8px;
+}
+
+/* Fonts come from next/font at runtime, so they map inline. */
+@theme inline {
+  --font-display: var(--font-archivo);
+  --font-sans: var(--font-inter);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-text);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-archivo), var(--font-inter), system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Logged numbers align in columns (Brain/11 typography rule) */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
