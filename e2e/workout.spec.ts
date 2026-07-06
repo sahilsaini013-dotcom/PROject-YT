@@ -66,6 +66,10 @@ test("client completes an assigned workout, logs sets, gets a PR", async ({
   await cp.getByRole("link", { name: /Start workout/ }).click();
   await expect(cp).toHaveURL(/\/app\/workout\//);
 
+  await cp
+    .getByLabel("Substitution note for Back Squat")
+    .fill("Knee felt tight; used stance adjustment");
+
   // Log 3 sets of the squat
   const weights = ["100", "100", "100"];
   const reps = ["5", "5", "5"];
@@ -91,6 +95,13 @@ test("client completes an assigned workout, logs sets, gets a PR", async ({
     .toString()
     .trim();
   expect(Number(logged)).toBe(3);
+
+  const noted = execSync(
+    `psql "${DB_URL}" -tAc "select count(*) from public.set_logs sl join public.workout_sessions ws on ws.id = sl.session_id join auth.users u on u.id = ws.client_id where u.email = '${clientEmail}' and sl.pain_note = 'Knee felt tight; used stance adjustment'"`,
+  )
+    .toString()
+    .trim();
+  expect(Number(noted)).toBe(3);
 
   const prCount = execSync(
     `psql "${DB_URL}" -tAc "select count(*) from public.personal_records pr join auth.users u on u.id = pr.client_id where u.email = '${clientEmail}'"`,

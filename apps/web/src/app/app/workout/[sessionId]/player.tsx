@@ -4,7 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { categoryLabel, type ExerciseCategory } from "@training-hub/shared";
 import { Button, Card, ErrorText } from "@/components/ui";
-import { completeSession, saveSet, startSession } from "./actions";
+import {
+  completeSession,
+  saveExerciseNote,
+  saveSet,
+  startSession,
+} from "./actions";
 
 type Prescription = {
   id: string;
@@ -21,6 +26,7 @@ type ExistingSet = {
   weight_kg: number | null;
   reps: number | null;
   rpe: number | null;
+  pain_note: string | null;
   substituted_exercise_id: string | null;
 };
 
@@ -179,7 +185,10 @@ function ExerciseBlock({
   onRest: () => void;
 }) {
   const p = prescription;
-  const [note, setNote] = useState("");
+  const initialNote =
+    Array.from({ length: p.sets }, (_, i) => existingFor(p.id, i + 1)?.pain_note)
+      .find((value): value is string => Boolean(value)) ?? "";
+  const [note, setNote] = useState(initialNote);
 
   return (
     <Card className="space-y-3">
@@ -212,6 +221,7 @@ function ExerciseBlock({
               pde={p}
               setIndex={setIndex}
               prev={prev}
+              painNote={note.trim() || null}
               onLogged={onRest}
             />
           );
@@ -221,6 +231,9 @@ function ExerciseBlock({
       <input
         value={note}
         onChange={(e) => setNote(e.target.value)}
+        onBlur={() =>
+          void saveExerciseNote(sessionId, p.id, note.trim() || null)
+        }
         placeholder="Substitution / note (optional)…"
         className="w-full rounded-(--radius-control) border border-border bg-surface px-3 py-2 text-sm placeholder:text-text-muted focus:border-accent focus:outline-none"
         aria-label={`Substitution note for ${p.exercise?.name ?? "exercise"}`}
@@ -234,12 +247,14 @@ function SetRow({
   pde,
   setIndex,
   prev,
+  painNote,
   onLogged,
 }: {
   sessionId: string;
   pde: Prescription;
   setIndex: number;
   prev: ExistingSet | undefined;
+  painNote: string | null;
   onLogged: () => void;
 }) {
   const [weight, setWeight] = useState(prev?.weight_kg?.toString() ?? "");
@@ -257,6 +272,7 @@ function SetRow({
       weight_kg: weight ? Number(weight) : null,
       reps: reps ? Number(reps) : null,
       rpe: rpe ? Number(rpe) : null,
+      pain_note: painNote,
       substituted_exercise_id: null,
     });
     if (restAfter) onLogged();
