@@ -447,6 +447,23 @@ create policy "trainer_write_nutrition_targets" on nutrition_targets
   );
 ```
 
+### Enforcement details (implemented)
+
+- Column-level rules RLS cannot express are enforced by triggers:
+  `trainer_clients` participants are immutable and `invited → active` is only
+  permitted inside `accept_invitation()` (which sets a transaction-local
+  flag); `messages` are immutable after send except `read_at`, settable only
+  by the recipient.
+- Invitation lifecycle is RPC-only (`security definer`): `create_invitation(email)`
+  generates the token server-side; `get_invitation(token)` is the public
+  accept-page lookup (marks overdue invites expired); `accept_invitation(token)`
+  validates token + caller email, activates the link, opens the message
+  thread, and notifies the trainer.
+- Explicit grants: `authenticated` and `service_role` get table DML +
+  function execute; `anon` gets nothing except `get_invitation`.
+- `handle_new_user()` creates the profile row on signup from auth metadata;
+  unknown role values default to `client` rather than failing the signup.
+
 ### Per-table access matrix
 
 "Own" means rows where the user's id matches the owning column. Trainer access always requires the active-link check above.

@@ -41,3 +41,23 @@ date · sprint · completed (with SHAs) · in flight · exact next action · blo
 - **New: `supabase/tests/rls_test.sql`** — 38 pgTAP assertions: per-table stranger-read denial for all 26 tables, write denial, self-activation/repoint/forgery escalation attempts, positive control. Wired into CI (`npx supabase test db`). All pass locally.
 
 Deferred to Sprint 1 (noted from review): invitation-acceptance security-definer RPC (`accept_invitation`) — the redemption path is intentionally absent in Sprint 0.
+
+## 2026-07-06 — Session 2 (Sprint 1)
+
+**Sprint:** 1 — auth, roles, invites, onboarding.
+
+**Completed (branch `claude/sprint-1-auth-invites`, stacked on Sprint 0 branch):**
+- Migration `20260707000001_invitation_flow.sql`: `create_invitation` (server-side token via pgcrypto — needs `extensions` in search_path), `get_invitation` (public accept-page lookup, marks overdue invites expired), `accept_invitation` (validates token + caller email, activates link via the transition-trigger flag, opens message thread, notifies trainer). Executes locked to the right roles; anon can only `get_invitation`.
+- Generated DB types (`supabase gen types`) into `packages/shared/src/database.types.ts`; both Supabase clients are typed. NOTE: CLI appends a PostHog error line to stdout — strip it when regenerating.
+- Auth UI: `/auth/sign-in` (password + magic link modes), `/auth/sign-up` (trainer), `/auth/invite/[token]` (validated accept + client signup), middleware (session refresh + role routing from user_metadata.role; RLS remains the data guard).
+- Coach roster `/coach`: real client list, pending invites, invite form (server action returns shareable link built from request origin — NEXT_PUBLIC_SITE_URL host mismatch cost an hour: cookies don't cross localhost/127.0.0.1), sign-out.
+- Client `/app`: personalized Today shell + onboarding CTA; `/app/onboarding`: full client_profiles form.
+- e2e `auth.spec.ts` (all passing): full trainer→invite→accept→onboard→Today loop across two browser contexts, role-routing denials, anonymous redirects, expired-token rejection (DB-level expiry).
+
+**Verification:** pgTAP 38/38 ✓, typecheck ✓, lint ✓, build ✓, e2e 6/6 ✓.
+
+**In flight:** waiting on PR #3 (Sprint 0) CI after the playwright-install fix; Sprint 1 PR opens after #3 merges (branch will be rebased onto main).
+
+**Exact next action:** check PR #3 CI → merge → rebase this branch → open Sprint 1 PR → /code-review + /security-review (auth sprint) → merge → Sprint 2 (exercise library + program builder).
+
+**Blockers:** GitHub MCP flapping (needs re-auth periodically); webhook events still arrive. DEFERRED (unchanged): cloud deploy pending credentials.
