@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ButtonLink, Card } from "@/components/ui";
 
@@ -47,8 +46,15 @@ export default async function ClientToday() {
   const todaySession = sessions?.find((s) => s.scheduled_date === today);
   const upcoming = (sessions ?? []).filter((s) => s.id !== todaySession?.id);
 
+  const { data: checkedInToday } = await supabase
+    .from("check_ins")
+    .select("id")
+    .eq("client_id", user!.id)
+    .eq("checked_in_on", today)
+    .maybeSingle();
+
   return (
-    <main className="min-h-screen bg-ink px-6 py-10">
+    <main className="px-6 py-10">
       <div className="mx-auto max-w-md space-y-6">
         <header className="flex items-center justify-between">
           <div>
@@ -66,6 +72,24 @@ export default async function ClientToday() {
             </p>
             <ButtonLink href="/app/onboarding" className="mt-4">
               Complete profile
+            </ButtonLink>
+          </Card>
+        )}
+
+        {clientProfile && !checkedInToday && (
+          <Card className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="font-bold">Daily check-in</h2>
+              <p className="text-sm text-text-muted">
+                Two minutes. Helps your coach dial in your training.
+              </p>
+            </div>
+            <ButtonLink
+              href="/app/check-in"
+              variant="secondary"
+              className="shrink-0"
+            >
+              Check in
             </ButtonLink>
           </Card>
         )}
@@ -130,15 +154,6 @@ export default async function ClientToday() {
             </Card>
           </div>
         )}
-
-        <nav className="flex justify-center gap-6 pt-2 text-sm text-text-muted">
-          <Link href="/app/progress" className="transition-colors hover:text-text">
-            Progress
-          </Link>
-          <Link href="/app/settings" className="transition-colors hover:text-text">
-            Settings
-          </Link>
-        </nav>
       </div>
     </main>
   );

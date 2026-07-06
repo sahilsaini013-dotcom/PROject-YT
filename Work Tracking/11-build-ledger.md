@@ -58,7 +58,7 @@ Deferred to Sprint 1 (noted from review): invitation-acceptance security-definer
 
 **In flight:** waiting on PR #3 (Sprint 0) CI after the playwright-install fix; Sprint 1 PR opens after #3 merges (branch will be rebased onto main).
 
-**Exact next action:** check PR #3 CI → merge → rebase this branch → open Sprint 1 PR → /code-review + /security-review (auth sprint) → merge → Sprint 2 (exercise library + program builder).
+**Exact next action:** check PR #3 CI → merge → rebase this branch → open Sprint 1 PR → /code-review + /security-review (auth sprint) → merge → Sprint 2 (exercise library + program builder + assignment).
 
 **Blockers:** GitHub MCP flapping (needs re-auth periodically); webhook events still arrive. DEFERRED (unchanged): cloud deploy pending credentials.
 
@@ -132,3 +132,23 @@ Supabase + Playwright suite after push.
 
 **Exact next action:** push the fix to `claude/sprint-3-workout-player`, wait
 for PR #6 CI, then mark ready and merge if green.
+
+## 2026-07-06 — Session 2 (Sprint 4)
+
+**Sprint:** 4 — check-ins, nutrition targets, meal log, water. Branch `claude/sprint-4-recovery-nutrition` (stacked on Sprint 3).
+
+**Completed:**
+- Client PWA bottom nav via `app/(tabs)/` route group (Today/Check-in/Nutrition/Progress); Today, workout, onboarding restructured accordingly.
+- Daily check-in `/app/check-in`: 1–5 pill scales (sleep/soreness/energy/mood/motivation/stress) + hours + pain/comment; upsert on (client_id, checked_in_on) → one per day enforced (DB unique + UI "already checked in, updating").
+- Nutrition `/app/nutrition`: trainer targets vs consumed (calories/protein bars), water tracker with ±250ml upsert on (client_id, logged_on) and progress bar vs target, meal logging (title/notes/optional macros/photo). Meal photos upload client-side to the private `meal-photos` bucket ({client_id}/{yyyy-mm}/{meal_id}.ext); displayed via server-signed URLs.
+- Coach targets `/coach/clients/[id]/nutrition/targets`: sets calories/protein/carbs/fat/water (+guidance), inserts a new row keeping history; linked from client detail.
+- Progress `/app/progress`: PR list (full trends are Sprint 6).
+- Today nudges to the daily check-in when not yet done.
+- next.config: Supabase host added to image remotePatterns for signed photo URLs.
+- e2e `nutrition.spec.ts`: check-in (asserts one row), meal+photo (asserts meal_photos row, asserts the private bucket rejects public access), water vs target (polls DB for the async upsert).
+
+**Verification:** typecheck ✓, lint ✓, build ✓ (17 routes), pgTAP 46/46 ✓, e2e 11/11 ✓.
+
+**Exact next action:** open Sprints 1–4 PRs when GitHub MCP returns. Then Sprint 5 (trainer review tabs + Realtime messaging; /security-review after).
+
+**Blockers:** GitHub MCP still down → PRs deferred. Cloud deploy deferred.
