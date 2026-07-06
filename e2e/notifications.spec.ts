@@ -97,6 +97,8 @@ test("notifications fire in-app and by email for invite, assignment, and message
 
   // Message → in-app notification (trigger) + email
   await tp.goto(`/coach/messages/${clientId}`);
+  await expect(tp.getByLabel("Message")).toBeVisible();
+  await tp.waitForTimeout(500);
   await tp.getByLabel("Message").fill("Welcome aboard!");
   await tp.getByRole("button", { name: "Send" }).click();
 
@@ -121,6 +123,8 @@ test("notifications fire in-app and by email for invite, assignment, and message
 
   // Reverse direction: client messages coach -> trainer gets notification + email.
   await cp.goto("/app/messages");
+  await expect(cp.getByLabel("Message")).toBeVisible();
+  await cp.waitForTimeout(500);
   await cp.getByLabel("Message").fill("Thanks coach!");
   await cp.getByRole("button", { name: "Send" }).click();
 

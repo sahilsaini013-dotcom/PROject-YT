@@ -83,6 +83,9 @@ test("trainer reviews real client data and exchanges live messages", async ({
   // --- Realtime messaging between two live contexts ---
   await tp.goto(`/coach/messages/${clientId}`);
   await cp.goto("/app/messages");
+  await expect(tp.getByLabel("Message")).toBeVisible();
+  await expect(cp.getByLabel("Message")).toBeVisible();
+  await tp.waitForTimeout(500);
 
   await tp.getByLabel("Message").fill("Great first session!");
   await tp.getByRole("button", { name: "Send" }).click();
