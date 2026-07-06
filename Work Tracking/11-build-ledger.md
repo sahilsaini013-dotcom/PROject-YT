@@ -172,3 +172,21 @@ for PR #6 CI, then mark ready and merge if green.
 ### Sprint 5 security review
 
 /security-review (messaging + storage) — no exploitable findings. Realtime postgres_changes is RLS-filtered per-subscriber (client thread_id filter is not the boundary); notify_on_message definer trigger safe (recipient derived from thread, values not concatenated); message send/read gated by RLS + immutability trigger; review tabs gated by is_linked_trainer; no service-role in app code.
+
+## 2026-07-06 — Session 2 (Sprint 6)
+
+**Sprint:** 6 — progress trends, notifications (in-app + email), landing/a11y polish. Branch `claude/sprint-6-progress-notifications` (stacked on Sprint 5).
+
+**Completed:**
+- Email transport: `lib/email.ts` (nodemailer, env-driven, no-op if unset) → Mailpit locally (SMTP port 54325 exposed in config.toml). Migration `email_for_user` RPC (guarded email lookup). Emails sent for invite (inviteClient action), assigned workout (assignProgram action), and message (message send routed through a new `sendMessage` server action so it can email while the insert still fires Realtime + the in-app notify trigger).
+- In-app notifications: `NotificationsList` + mark-read-on-view; `/coach/notifications` and `/app/notifications` pages; unread bell badge in coach nav and client Today header.
+- Progress trends: inline-SVG `LineChart`/`BarChart` (CSP-safe, no deps). Client `/app/progress` now shows strength trend (heaviest set/day for the top exercise), 8-week consistency bars, and PRs.
+- a11y: fixed `link-in-text-block` (auth inline links now always underlined). Landing Lighthouse a11y = 100; axe-core (wcag2a/aa) shows zero serious/critical violations on /coach, /coach/programs, /coach/exercises, /app, /app/onboarding, /app/check-in, /app/nutrition.
+- Schema doc updated with the Sprint 1–6 RPCs + triggers.
+- e2e: `notifications.spec.ts` (invite/assignment/message fire in-app rows + Mailpit emails), `a11y.spec.ts` (public + authed pages, no serious violations).
+
+**Verification:** typecheck ✓, lint ✓, build ✓ (21 routes), pgTAP 46/46 ✓, e2e 15/15 ✓ (incl. a11y + notifications), Lighthouse a11y 100 (landing).
+
+**Exact next action:** open Sprints 1–6 PRs when GitHub MCP returns; then the Final phase — multi-agent UI audit loop, then v1 completion report.
+
+**Blockers:** GitHub MCP still down → PRs deferred. Cloud deploy deferred (creds).

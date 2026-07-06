@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { sessionLabel } from "@training-hub/shared";
 import { createClient } from "@/lib/supabase/server";
 import { WorkoutPlayer } from "./player";
 
@@ -17,7 +18,7 @@ export default async function WorkoutPage({
     .select(
       `id, status, program_day_id,
        program_day:program_days (
-         name,
+         name, week:program_weeks(week_index),
          program_day_exercises (
            id, position, sets, reps_target, rpe_target, rest_seconds, notes,
            exercise:exercises ( id, name, category )
@@ -46,7 +47,10 @@ export default async function WorkoutPage({
   return (
     <WorkoutPlayer
       sessionId={sessionId}
-      dayName={session.program_day?.name ?? "Workout"}
+      dayName={sessionLabel(
+        session.program_day?.week?.week_index,
+        session.program_day?.name,
+      )}
       prescriptions={prescriptions.map((p) => ({
         id: p.id,
         sets: p.sets,

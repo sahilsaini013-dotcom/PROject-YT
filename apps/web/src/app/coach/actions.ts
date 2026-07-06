@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { emailShell, escapeHtml, sendEmail } from "@/lib/email";
 
 export type InviteResult =
   | { ok: true; inviteUrl: string; email: string }
@@ -36,8 +37,27 @@ export async function inviteClient(
     "http://localhost:3000";
   const inviteUrl = `${base}/auth/invite/${invitation.token}`;
 
-  // Email delivery becomes a real notification in Sprint 5; the link is
-  // always surfaced in the roster so trainers can share it directly.
+  // Email the invite (captured by Mailpit in dev/CI). The link is also
+  // surfaced in the roster so the trainer can share it directly.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: trainer } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user!.id)
+    .single();
+  const trainerName = trainer?.full_name ?? "Your coach";
+  await sendEmail({
+    to: email,
+    subject: `${trainerName} invited you to Training Hub`,
+    html: emailShell(
+      "You've been invited",
+      `${escapeHtml(trainerName)} wants to coach you on Training Hub.
+       <p style="margin-top:16px"><a href="${inviteUrl}" style="background:#C6FF00;color:#0B0D10;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Accept invite</a></p>`,
+    ),
+  });
+
   revalidatePath("/coach");
   return { ok: true, inviteUrl, email };
 }

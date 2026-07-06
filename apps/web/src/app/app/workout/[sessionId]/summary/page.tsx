@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { formatKg } from "@training-hub/shared";
 import { createClient } from "@/lib/supabase/server";
 import { ButtonLink, Card } from "@/components/ui";
 
@@ -61,7 +62,7 @@ export default async function SummaryPage({
 
         <div className="grid grid-cols-3 gap-3">
           <Stat label="Sets" value={totalSets} />
-          <Stat label="Volume" value={`${Math.round(totalVolume)}`} unit="kg" />
+          <Stat label="Volume" value={formatKg(totalVolume)} unit="kg" />
           <Stat label="PRs" value={prs.length} accent={prs.length > 0} />
         </div>
 
