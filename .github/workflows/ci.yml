@@ -39,6 +39,9 @@ jobs:
       - name: Verify migrations replay clean
         run: npx supabase db reset
 
+      - name: Negative RLS tests (pgTAP)
+        run: npx supabase test db
+
       - name: Export local anon key for the app
         run: |
           echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(npx supabase status -o json | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>console.log(JSON.parse(d).ANON_KEY))')" >> "$GITHUB_ENV"

@@ -1,11 +1,13 @@
+import { existsSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
 
 const PORT = Number(process.env.PORT ?? 3000);
 
-// The cloud sandbox preinstalls a pinned Chromium; use it instead of
-// downloading a Playwright-matched build. CI installs its own via
-// `playwright install`, so no override is needed there.
-const chromiumPath = process.env.CI ? undefined : "/opt/pw-browsers/chromium";
+// The cloud sandbox preinstalls a pinned Chromium at this path; use it when
+// present. Everywhere else (CI, dev machines) Playwright's own browsers apply.
+const sandboxChromium = "/opt/pw-browsers/chromium";
+const chromiumPath =
+  !process.env.CI && existsSync(sandboxChromium) ? sandboxChromium : undefined;
 
 export default defineConfig({
   testDir: "./e2e",

@@ -435,7 +435,10 @@ begin
   insert into public.profiles (id, role, full_name, timezone)
   values (
     new.id,
-    coalesce(new.raw_user_meta_data ->> 'role', 'client')::user_role,
+    -- Never cast raw metadata: an unexpected value would abort the auth
+    -- insert and brick the signup. Unknown roles default to client.
+    case when new.raw_user_meta_data ->> 'role' = 'trainer'
+      then 'trainer'::user_role else 'client'::user_role end,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
     coalesce(new.raw_user_meta_data ->> 'timezone', 'UTC')
   );
@@ -583,6 +586,69 @@ as $$
 $$;
 
 -- ============================================================
+-- Row-shape guards (RLS cannot restrict columns, so triggers do)
+-- ============================================================
+
+-- trainer_clients: participants are immutable, and a link may only become
+-- active inside the invitation-acceptance RPC (which sets the local flag).
+create function public.enforce_trainer_clients_transitions()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.trainer_id is distinct from old.trainer_id
+     or new.client_id is distinct from old.client_id then
+    raise exception 'participants of a coaching link cannot be changed';
+  end if;
+  if new.status = 'active' and old.status = 'invited'
+     and coalesce(current_setting('training_hub.invitation_acceptance', true), '') <> 'on' then
+    raise exception 'links are activated only by accepting an invitation';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger enforce_trainer_clients_transitions
+  before update on public.trainer_clients
+  for each row execute function public.enforce_trainer_clients_transitions();
+
+-- messages: immutable once sent; only the recipient may set read_at.
+create function public.enforce_message_update()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.thread_id is distinct from old.thread_id
+     or new.sender_id is distinct from old.sender_id
+     or new.body is distinct from old.body then
+    raise exception 'messages are immutable; only read_at may change';
+  end if;
+  if new.read_at is distinct from old.read_at and auth.uid() = old.sender_id then
+    raise exception 'only the recipient may set read_at';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger enforce_message_update
+  before update on public.messages
+  for each row execute function public.enforce_message_update();
+
+-- Owner uuid of a storage object path ({client_id}/...), null when the
+-- first segment is not a uuid — so policies filter instead of erroring.
+create function public.storage_path_owner(_name text)
+returns uuid
+language sql
+stable
+as $$
+  select case
+    when (storage.foldername(_name))[1]
+         ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    then ((storage.foldername(_name))[1])::uuid
+  end;
+$$;
+
+-- ============================================================
 -- Row Level Security
 -- ============================================================
 
@@ -642,11 +708,17 @@ create policy "client_profiles_own" on public.client_profiles for all
 create policy "client_profiles_trainer_read" on public.client_profiles for select
   using (public.is_linked_trainer(auth.uid(), id));
 
--- trainer_clients: both sides read; trainer inserts; both sides update status
+-- trainer_clients: both sides read; trainer may only create *invited* links
+-- (activation happens exclusively in the invitation-acceptance RPC); both
+-- sides may update status, guarded by the transition trigger below.
 create policy "trainer_clients_select" on public.trainer_clients for select
   using (trainer_id = auth.uid() or client_id = auth.uid());
 create policy "trainer_clients_trainer_insert" on public.trainer_clients for insert
-  with check (trainer_id = auth.uid());
+  with check (
+    trainer_id = auth.uid()
+    and public.is_trainer(auth.uid())
+    and status = 'invited'
+  );
 create policy "trainer_clients_update" on public.trainer_clients for update
   using (trainer_id = auth.uid() or client_id = auth.uid())
   with check (trainer_id = auth.uid() or client_id = auth.uid());
@@ -848,6 +920,20 @@ create policy "ai_recs_trainer_update" on public.ai_recommendations for update
   with check (trainer_id = auth.uid());
 
 -- ============================================================
+-- Grants — this image's default ACLs give new tables/functions no
+-- privileges to API roles; RLS is the row filter on top of these.
+-- anon gets nothing: every v1 surface requires a signed-in user.
+-- ============================================================
+
+grant usage on schema public to authenticated, service_role;
+grant select, insert, update, delete on all tables in schema public
+  to authenticated, service_role;
+grant usage, select on all sequences in schema public
+  to authenticated, service_role;
+grant execute on all functions in schema public
+  to authenticated, service_role;
+
+-- ============================================================
 -- Storage buckets + policies
 -- Path convention: {client_id}/{yyyy-mm}/{uuid}.{ext}
 -- ============================================================
@@ -871,7 +957,7 @@ create policy "progress_photos_owner_all" on storage.objects for all
 create policy "progress_photos_trainer_read" on storage.objects for select
   using (
     bucket_id = 'progress-photos'
-    and public.is_linked_trainer(auth.uid(), ((storage.foldername(name))[1])::uuid)
+    and public.is_linked_trainer(auth.uid(), public.storage_path_owner(name))
   );
 
 create policy "meal_photos_owner_all" on storage.objects for all
@@ -886,7 +972,7 @@ create policy "meal_photos_owner_all" on storage.objects for all
 create policy "meal_photos_trainer_read" on storage.objects for select
   using (
     bucket_id = 'meal-photos'
-    and public.is_linked_trainer(auth.uid(), ((storage.foldername(name))[1])::uuid)
+    and public.is_linked_trainer(auth.uid(), public.storage_path_owner(name))
   );
 
 create policy "exercise_media_public_read" on storage.objects for select

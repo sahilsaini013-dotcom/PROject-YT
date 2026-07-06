@@ -28,3 +28,16 @@ date · sprint · completed (with SHAs) · in flight · exact next action · blo
 **Exact next action:** open Sprint 0 PR → run /code-review (medium) → CI green → merge → start Sprint 1 (auth + invites) on a fresh branch off main.
 
 **Blockers:** none. No cloud Supabase/Vercel credentials provided yet — not blocking; app stays deployable, deploy steps documented in README. DEFERRED: cloud deploy until credentials exist (ask outstanding in Sprint 0 PR description).
+
+### Addendum — code review round (same session)
+
+/code-review (medium, multi-agent) on PR #3 found and fixed before merge:
+- **RLS escalation (critical):** `trainer_clients` insert now restricted to `status='invited'` + trainer role; a transition trigger makes participants immutable and blocks invited→active outside the invitation-acceptance RPC (RPC will set local flag `training_hub.invitation_acceptance` — to be built in Sprint 1).
+- **Message forgery (critical):** trigger makes messages immutable except `read_at`, settable only by the recipient.
+- **Signup bricking:** `handle_new_user` no longer casts raw metadata; unknown roles default to client.
+- **Storage policy crash:** `storage_path_owner()` returns null for non-uuid first path segments instead of erroring the query.
+- **Missing GRANTs (critical, found by new tests):** this Supabase image's default ACLs give API roles no DML on new tables and no EXECUTE on functions — the whole API would have 42501'd in prod. Explicit grants added to the migration (authenticated + service_role only; anon gets nothing).
+- Playwright chromium path now applies only when the sandbox binary exists; `apps/web/.gitignore` keeps `.env.example` trackable; brand tokens defined once in `@theme`.
+- **New: `supabase/tests/rls_test.sql`** — 38 pgTAP assertions: per-table stranger-read denial for all 26 tables, write denial, self-activation/repoint/forgery escalation attempts, positive control. Wired into CI (`npx supabase test db`). All pass locally.
+
+Deferred to Sprint 1 (noted from review): invitation-acceptance security-definer RPC (`accept_invitation`) — the redemption path is intentionally absent in Sprint 0.

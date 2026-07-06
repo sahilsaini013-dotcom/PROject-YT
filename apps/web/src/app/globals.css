@@ -1,40 +1,30 @@
 @import "tailwindcss";
 
-/* Training Hub brand tokens — source of truth: Brain/11-brand-design-system.md */
-:root {
-  --ink: #0b0d10;
-  --surface: #15181d;
-  --surface-raised: #1d2127;
-  --border: #2a2f37;
-  --text: #f5f7fa;
-  --text-muted: #8a94a3;
-  --accent: #c6ff00;
-  --accent-pressed: #a8d400;
-  --success: #34d399;
-  --warning: #fbbf24;
-  --danger: #f87171;
-  --info: #60a5fa;
-}
-
-@theme inline {
-  --color-ink: var(--ink);
-  --color-surface: var(--surface);
-  --color-surface-raised: var(--surface-raised);
-  --color-border: var(--border);
-  --color-text: var(--text);
-  --color-text-muted: var(--text-muted);
-  --color-accent: var(--accent);
-  --color-accent-pressed: var(--accent-pressed);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-danger: var(--danger);
-  --color-info: var(--info);
-
-  --font-display: var(--font-archivo);
-  --font-sans: var(--font-inter);
+/* Training Hub brand tokens — source of truth: Brain/11-brand-design-system.md.
+   Defined once in @theme: Tailwind emits them as CSS vars (--color-*) and
+   generates the matching utilities. */
+@theme {
+  --color-ink: #0b0d10;
+  --color-surface: #15181d;
+  --color-surface-raised: #1d2127;
+  --color-border: #2a2f37;
+  --color-text: #f5f7fa;
+  --color-text-muted: #8a94a3;
+  --color-accent: #c6ff00;
+  --color-accent-pressed: #a8d400;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #60a5fa;
 
   --radius-card: 12px;
   --radius-control: 8px;
+}
+
+/* Fonts come from next/font at runtime, so they map inline. */
+@theme inline {
+  --font-display: var(--font-archivo);
+  --font-sans: var(--font-inter);
 }
 
 html {
@@ -42,8 +32,8 @@ html {
 }
 
 body {
-  background: var(--ink);
-  color: var(--text);
+  background: var(--color-ink);
+  color: var(--color-text);
   font-family: var(--font-inter), system-ui, sans-serif;
 }
 
