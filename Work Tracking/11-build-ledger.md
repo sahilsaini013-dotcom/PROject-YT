@@ -225,3 +225,12 @@ for PR #6 CI, then mark ready and merge if green.
 **Exact next action:** user connects Vercel (import repo, root `apps/web`, env per `.env.production.example`, then set `NEXT_PUBLIC_SITE_URL` + Supabase auth site/redirect URLs to the issued domain). Everything else is done.
 
 **Blockers:** Vercel credential/connector only.
+
+### 2026-07-07 — Frontend deployed (app is LIVE)
+
+User provided a scoped Vercel token; deployed from the session via Vercel API + CLI:
+- Project `training-hub` created (root `apps/web`, framework nextjs), env vars set (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, then `NEXT_PUBLIC_SITE_URL`), two production deploys (second bakes in the site URL).
+- **Production URL: https://training-hub-lyart.vercel.app**
+- Route smoke: `/`, `/auth/sign-up`, `/auth/sign-in`, PWA manifest all 200; `/coach` + `/app` redirect to sign-in with `next` param.
+- Full browser journey (Playwright, same build against the cloud DB; sandbox Chromium can't egress so browser→Supabase calls were relayed through Node): trainer signup via the real form → lands on `/coach`; exercise library renders the 100 seeded cloud exercises; session persists across a revisit. Test user removed after; DB back to the 4 real accounts.
+- Remaining (1 min, dashboard-only, not blocking password auth): Supabase Auth → URL Configuration → set site URL + redirect to https://training-hub-lyart.vercel.app (needed for magic-link emails), and optionally enable leaked-password protection. Real SMTP env vars whenever notification emails should go out.
