@@ -34,13 +34,22 @@ npm run build
 npx playwright test     # e2e (starts the app itself)
 ```
 
-## Deploy (ready, pending credentials)
+## Deploy
 
-The app deploys as a standard Next.js + Supabase pair:
+Backend target: the `training-hub` Supabase cloud project (ref
+`buqplfqxyepqtwxmrsui`). The exact push sequence lives in
+`scripts/cloud-deploy-plan.md`; one-time cloud fixups live in
+`supabase/cloud/`.
 
-1. **Supabase cloud**: create a project, then `npx supabase link --project-ref <ref>` and `npx supabase db push` (applies `supabase/migrations/`), then run `supabase/seed.sql` once via the SQL editor or `psql`.
-2. **Vercel**: import the repo, set root directory to `apps/web`, and set env vars from `.env.example` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`, `SUPABASE_SERVICE_ROLE_KEY` server-side only).
-3. In Supabase Auth settings, set the site URL to the deployed domain and add it to redirect URLs.
+1. **Supabase cloud**: `npx supabase link --project-ref buqplfqxyepqtwxmrsui`
+   then `npx supabase db push` (applies `supabase/migrations/`), run
+   `supabase/seed.sql` once, then `supabase/cloud/01_backfill_legacy_auth_profiles.sql`
+   (profiles for auth accounts that predate the v1 schema).
+2. **Vercel**: import the repo, set root directory to `apps/web`, and set the
+   env vars documented in `.env.production.example`.
+3. In Supabase Auth settings: site URL = the deployed domain, add it to the
+   redirect URLs, and keep email confirmations OFF until custom SMTP exists
+   (the invite-accept flow needs a session immediately after signup).
 
 ## CI
 
