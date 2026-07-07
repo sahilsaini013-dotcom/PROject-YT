@@ -207,3 +207,21 @@ for PR #6 CI, then mark ready and merge if green.
 - Draft PR #2 (Supabase MCP config) — left open intentionally.
 
 **v1 is DONE per the GOAL.md Definition of Done. Phase 2 (AI review inbox) is unblocked.**
+
+## 2026-07-07 — Session 3 (App-first cloud deploy)
+
+**Phase:** new directive — app version first, deploy fully before expanding the website. Branch `claude/app-deploy-phase` (PR #12).
+
+**Backend deployed to Supabase cloud** (`training-hub`, ref `buqplfqxyepqtwxmrsui`, restored from pause with user approval):
+- Legacy review (the "migrate only clean data" pass): the older project `teybyheagwvxqumnbllt` is completely empty (0 tables, 0 users, 0 storage objects — nothing to migrate). `training-hub` held a 5-table legacy schema (`profiles`, `plans`, `sessions`, `messages`, `templates`) — **all 0 rows** — plus 4 legacy auth accounts and legacy `handle_new_user`/role-helper functions. Decision: drop the empty legacy schema + functions (`pre_reset_legacy_public`, `pre_reset_legacy_functions`); keep the 4 auth accounts and backfill their `profiles` rows (`supabase/cloud/01_backfill_legacy_auth_profiles.sql`). No plans/workouts/routines existed anywhere to migrate.
+- Applied all six v1 migrations + seed. Verified: 26 tables, 65 RLS policies, 100 exercises, 4 backfilled profiles.
+- Security advisors: only WARNs. Fixed the actionable one — migration `20260711000001_function_search_path` pins `search_path` on the five remaining trigger/helper functions (also applied locally, schema doc updated). The security-definer EXECUTE warnings are by-design (helpers back RLS policy quals; revoking would break storage/table policy evaluation). Noted for later: enable HaveIBeenPwned password protection (dashboard toggle).
+- Auth config verified: `mailer_autoconfirm=true` (signup returns a session — required by the invite-accept flow), signups enabled.
+
+**Live smoke test against the cloud REST API (anon key):** signup → session ✓; authed reads 100 exercises ✓; sees only own profile ✓; anon sees zero profiles ✓; cross-user profile update affects 0 rows ✓; role change blocked by trigger ✓; trainer creates program ✓; own-profile update ✓. Test user + rows fully deleted afterwards (DB back to exactly the 4 legacy users, no test data).
+
+**Config for the frontend:** `.env.production.example` now carries the real project URL + publishable anon key (public-by-design); README deploy section documents the Vercel import (root `apps/web`).
+
+**Exact next action:** user connects Vercel (import repo, root `apps/web`, env per `.env.production.example`, then set `NEXT_PUBLIC_SITE_URL` + Supabase auth site/redirect URLs to the issued domain). Everything else is done.
+
+**Blockers:** Vercel credential/connector only.
