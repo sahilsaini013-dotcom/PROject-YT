@@ -36,10 +36,11 @@ npx playwright test     # e2e (starts the app itself)
 
 ## Deploy
 
-Backend target: the `training-hub` Supabase cloud project (ref
-`buqplfqxyepqtwxmrsui`). The exact push sequence lives in
-`scripts/cloud-deploy-plan.md`; one-time cloud fixups live in
-`supabase/cloud/`.
+**Live:** https://training-hub-lyart.vercel.app (Vercel project `training-hub`,
+root `apps/web`) backed by the `training-hub` Supabase cloud project (ref
+`buqplfqxyepqtwxmrsui`). Deployed 2026-07-07; the steps below reproduce it.
+The exact backend push sequence lives in `scripts/cloud-deploy-plan.md`;
+one-time cloud fixups live in `supabase/cloud/`.
 
 1. **Supabase cloud**: `npx supabase link --project-ref buqplfqxyepqtwxmrsui`
    then `npx supabase db push` (applies `supabase/migrations/`), run

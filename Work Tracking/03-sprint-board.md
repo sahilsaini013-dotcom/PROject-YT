@@ -2,14 +2,14 @@
 
 ## Current State
 
-Training Hub v1 is complete and merged. The backend is live on Supabase cloud (`training-hub`, ref `buqplfqxyepqtwxmrsui`) — schema, seed, and RLS verified against the live API. Frontend deploy waits only on Vercel access (steps in README + `.env.production.example`).
+Training Hub v1 is **deployed and live**: https://training-hub-lyart.vercel.app (Vercel, root `apps/web`) on the Supabase cloud backend (`training-hub`, ref `buqplfqxyepqtwxmrsui`). Schema, seed, RLS, and the full signup→dashboard journey verified against production infrastructure.
 
 ## To Do
 
 | ID | Task | Owner | Notes |
 | --- | --- | --- | --- |
-| D1-002 | Vercel frontend deploy | Sahil + Claude | Import repo (root `apps/web`), env per `.env.production.example`, then set site/redirect URLs. |
-| P2-001 | Plan Phase 2 AI review inbox | TBD | Starts after the app is deployed. |
+| D1-003 | Supabase auth URL config + SMTP | Sahil | Dashboard: site/redirect URLs → the live domain (magic links); SMTP env in Vercel for notification emails. |
+| P2-001 | Plan Phase 2 AI review inbox | TBD | v1 deployed; ready to start when prioritized. |
 
 ## In Progress
 
@@ -20,7 +20,8 @@ Training Hub v1 is complete and merged. The backend is live on Supabase cloud (`
 
 | ID | Task | Owner | Notes |
 | --- | --- | --- | --- |
-| D1-001 | Cloud backend deploy + legacy data review | Claude | PR #12: migrations/seed applied to cloud, advisors hardening migration, live RLS smoke test clean. |
+| D1-001 | Cloud backend deploy + legacy data review | Claude | PR #12 (merged): migrations/seed applied to cloud, advisors hardening migration, live RLS smoke test clean. |
+| D1-002 | Vercel frontend deploy | Claude | Live at training-hub-lyart.vercel.app; env vars set; browser journey verified against the cloud DB. |
 | V1-FINAL | Final UI audit and release bookkeeping | Codex | Merged (PR #10/#11): final audit artifact inspected, no release-blocking findings. |
 
 ## Done
