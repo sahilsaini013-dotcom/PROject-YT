@@ -463,6 +463,9 @@ create policy "trainer_write_nutrition_targets" on nutrition_targets
   function execute; `anon` gets nothing except `get_invitation`.
 - `handle_new_user()` creates the profile row on signup from auth metadata;
   unknown role values default to `client` rather than failing the signup.
+- All functions pin `search_path` (security-definer ones since Sprint 1; the
+  remaining trigger/helper functions via `20260711000001_function_search_path`,
+  closing the Supabase linter 0011 warnings found on the cloud deploy).
 
 ### Per-table access matrix
 

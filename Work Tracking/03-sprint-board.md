@@ -2,13 +2,14 @@
 
 ## Current State
 
-Training Hub v1 is complete pending merge of the final audit/bookkeeping PR (#10).
+Training Hub v1 is complete and merged. The backend is live on Supabase cloud (`training-hub`, ref `buqplfqxyepqtwxmrsui`) — schema, seed, and RLS verified against the live API. Frontend deploy waits only on Vercel access (steps in README + `.env.production.example`).
 
 ## To Do
 
 | ID | Task | Owner | Notes |
 | --- | --- | --- | --- |
-| P2-001 | Plan Phase 2 AI review inbox | TBD | Starts only after PR #10 merges and v1 completion report is on main. |
+| D1-002 | Vercel frontend deploy | Sahil + Claude | Import repo (root `apps/web`), env per `.env.production.example`, then set site/redirect URLs. |
+| P2-001 | Plan Phase 2 AI review inbox | TBD | Starts after the app is deployed. |
 
 ## In Progress
 
@@ -19,7 +20,8 @@ Training Hub v1 is complete pending merge of the final audit/bookkeeping PR (#10
 
 | ID | Task | Owner | Notes |
 | --- | --- | --- | --- |
-| V1-FINAL | Final UI audit and release bookkeeping | Codex | PR #10: CI round 1 green; final audit artifact `final-ui-audit` inspected with no release-blocking findings. Docs update triggers round 2. |
+| D1-001 | Cloud backend deploy + legacy data review | Claude | PR #12: migrations/seed applied to cloud, advisors hardening migration, live RLS smoke test clean. |
+| V1-FINAL | Final UI audit and release bookkeeping | Codex | Merged (PR #10/#11): final audit artifact inspected, no release-blocking findings. |
 
 ## Done
 
