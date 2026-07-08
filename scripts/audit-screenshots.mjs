@@ -153,13 +153,15 @@ await cp.getByLabel("Calories (optional)").fill("640");
 await cp.getByLabel("Protein g (optional)").fill("52");
 await cp.getByRole("button", { name: "Save meal" }).click();
 await cp.waitForTimeout(500);
-await cp.getByRole("button", { name: "+250 ml" }).click();
-await cp.getByRole("button", { name: "+250 ml" }).click();
+await cp.getByRole("button", { name: "+0.25 L" }).click();
+await cp.getByRole("button", { name: "+0.25 L" }).click();
 await cp.waitForTimeout(400);
 await shot(cp, "27-app-nutrition");
 
 await cp.goto(`${BASE}/app/progress`);
 await shot(cp, "28-app-progress");
+await cp.goto(`${BASE}/app/train`);
+await shot(cp, "28b-app-train");
 await cp.goto(`${BASE}/app/notifications`);
 await shot(cp, "29-app-notifications");
 
