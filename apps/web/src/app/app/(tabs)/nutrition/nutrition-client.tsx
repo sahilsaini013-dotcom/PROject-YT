@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { formatWater } from "@training-hub/shared";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Card, ErrorText, Input, Label } from "@/components/ui";
 
@@ -93,7 +94,8 @@ export function NutritionClient({
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-bold">Water</h2>
           <span className="tnum text-sm text-text-muted">
-            {water} ml{waterTarget ? ` / ${waterTarget} ml` : ""}
+            {formatWater(water)}
+            {waterTarget ? ` / ${formatWater(waterTarget)}` : ""}
           </span>
         </div>
         {waterTarget && (
@@ -113,7 +115,7 @@ export function NutritionClient({
             disabled={busyWater || water === 0}
             className="flex-1"
           >
-            −{WATER_STEP} ml
+            −0.25 L
           </Button>
           <Button
             variant="secondary"
@@ -121,7 +123,7 @@ export function NutritionClient({
             disabled={busyWater}
             className="flex-1"
           >
-            +{WATER_STEP} ml
+            +0.25 L
           </Button>
         </div>
       </Card>

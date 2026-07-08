@@ -2,17 +2,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { sessionLabel } from "@training-hub/shared";
 import { createClient } from "@/lib/supabase/server";
+import { todayISO } from "@/lib/dates";
 import { ButtonLink, Card } from "@/components/ui";
 
 export const metadata = { title: "Today" };
 
-function todayISO(timezone: string) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
+// Label a session row whether it's assigned (program day) or solo (title).
+function rowLabel(s: {
+  title: string | null;
+  program_day: { name: string | null; week: { week_index: number } | null } | null;
+}) {
+  return (
+    s.title ?? sessionLabel(s.program_day?.week?.week_index, s.program_day?.name)
+  );
 }
 
 export default async function ClientToday() {
@@ -39,7 +41,7 @@ export default async function ClientToday() {
   const { data: sessions } = await supabase
     .from("workout_sessions")
     .select(
-      "id, scheduled_date, status, program_day:program_days(name, week:program_weeks(week_index))",
+      "id, scheduled_date, status, assignment_id, title, program_day:program_days(name, week:program_weeks(week_index))",
     )
     .eq("client_id", user!.id)
     .neq("status", "completed")
@@ -47,8 +49,23 @@ export default async function ClientToday() {
     .order("scheduled_date")
     .limit(8);
 
-  const todaySession = sessions?.find((s) => s.scheduled_date === today);
-  const upcoming = (sessions ?? []).filter((s) => s.id !== todaySession?.id);
+  const todays = (sessions ?? []).filter((s) => s.scheduled_date === today);
+  // A coach-assigned session always leads; a solo session is the fallback.
+  const todaySession = todays.find((s) => s.assignment_id) ?? todays[0];
+  // A solo session running alongside the assigned one gets a slim resume row.
+  const soloAlongside = todaySession?.assignment_id
+    ? todays.find((s) => !s.assignment_id)
+    : undefined;
+  const upcoming = (sessions ?? []).filter(
+    (s) => s.id !== todaySession?.id && s.id !== soloAlongside?.id,
+  );
+
+  const { count: trainerCount } = await supabase
+    .from("trainer_clients")
+    .select("id", { count: "exact", head: true })
+    .eq("client_id", user!.id)
+    .eq("status", "active");
+  const hasTrainer = (trainerCount ?? 0) > 0;
 
   const { data: checkedInToday } = await supabase
     .from("check_ins")
@@ -129,14 +146,11 @@ export default async function ClientToday() {
         {todaySession ? (
           <Card className="border-accent/40">
             <p className="text-xs font-semibold uppercase tracking-wide text-accent">
-              Today&apos;s workout
+              {todaySession.assignment_id
+                ? "Today's workout"
+                : "Self-guided workout"}
             </p>
-            <h2 className="mt-1 text-xl font-bold">
-              {sessionLabel(
-                todaySession.program_day?.week?.week_index,
-                todaySession.program_day?.name,
-              )}
-            </h2>
+            <h2 className="mt-1 text-xl font-bold">{rowLabel(todaySession)}</h2>
             <ButtonLink
               href={`/app/workout/${todaySession.id}`}
               className="mt-4 w-full text-center"
@@ -156,8 +170,29 @@ export default async function ClientToday() {
             />
             <h2 className="text-lg font-bold">Nothing due today</h2>
             <p className="mt-1 max-w-xs text-sm text-text-muted">
-              Rest up. Your next session shows up here when it&apos;s scheduled.
+              {hasTrainer
+                ? "Rest up, or start your own session below."
+                : "Start your own workout whenever you're ready."}
             </p>
+            <ButtonLink href="/app/train" className="mt-4">
+              Start a self-guided workout
+            </ButtonLink>
+          </Card>
+        )}
+
+        {soloAlongside && (
+          <Card className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="truncate font-bold">{rowLabel(soloAlongside)}</p>
+              <p className="text-sm text-text-muted">Self-guided session</p>
+            </div>
+            <ButtonLink
+              href={`/app/workout/${soloAlongside.id}`}
+              variant="secondary"
+              className="shrink-0"
+            >
+              Resume
+            </ButtonLink>
           </Card>
         )}
 
@@ -173,12 +208,7 @@ export default async function ClientToday() {
                     key={s.id}
                     className="flex items-center justify-between px-5 py-3 text-sm"
                   >
-                    <span>
-                      {sessionLabel(
-                        s.program_day?.week?.week_index,
-                        s.program_day?.name,
-                      )}
-                    </span>
+                    <span>{rowLabel(s)}</span>
                     <span className="tnum text-text-muted">
                       {new Date(
                         `${s.scheduled_date}T00:00:00`,

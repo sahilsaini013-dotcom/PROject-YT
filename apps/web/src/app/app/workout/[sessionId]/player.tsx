@@ -2,17 +2,30 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { categoryLabel, type ExerciseCategory } from "@training-hub/shared";
+import {
+  categoryLabel,
+  kgToLb,
+  lbToKg,
+  weightUnitLabel,
+  type ExerciseCategory,
+  type UnitPreference,
+} from "@training-hub/shared";
 import { Button, Card, ErrorText } from "@/components/ui";
+import {
+  ExercisePicker,
+  type PickableExercise,
+} from "@/components/exercise-picker";
 import {
   completeSession,
   saveExerciseNote,
   saveSet,
+  saveSoloSet,
   startSession,
 } from "./actions";
 
 type Prescription = {
   id: string;
+  exercise_id: string;
   sets: number;
   reps_target: string;
   rpe_target: number | null;
@@ -22,6 +35,7 @@ type Prescription = {
 };
 type ExistingSet = {
   program_day_exercise_id: string | null;
+  exercise_id: string;
   set_index: number;
   weight_kg: number | null;
   reps: number | null;
@@ -33,11 +47,19 @@ type ExistingSet = {
 export function WorkoutPlayer({
   sessionId,
   dayName,
+  solo,
+  hasTrainer,
+  unit,
+  exercises,
   prescriptions,
   existing,
 }: {
   sessionId: string;
   dayName: string;
+  solo: boolean;
+  hasTrainer: boolean;
+  unit: UnitPreference;
+  exercises: PickableExercise[];
   prescriptions: Prescription[];
   existing: ExistingSet[];
 }) {
@@ -47,6 +69,10 @@ export function WorkoutPlayer({
   const [error, setError] = useState<string | null>(null);
   const [sessionRpe, setSessionRpe] = useState("");
   const [notes, setNotes] = useState("");
+  // Solo sessions can grow: routine/logged blocks come from props, ad-hoc adds
+  // append here.
+  const [blocks, setBlocks] = useState<Prescription[]>(prescriptions);
+  const [picking, setPicking] = useState(false);
 
   // Mark the session in progress once, on mount.
   useEffect(() => {
@@ -64,10 +90,40 @@ export function WorkoutPlayer({
     return () => clearTimeout(t);
   }, [rest]);
 
-  const existingFor = (pdeId: string, setIndex: number) =>
-    existing.find(
-      (e) => e.program_day_exercise_id === pdeId && e.set_index === setIndex,
-    );
+  // Assigned sets are keyed by the program-day-exercise slot; solo sets have no
+  // slot and are keyed by exercise id.
+  const existingFor = (p: Prescription, setIndex: number) =>
+    solo
+      ? existing.find(
+          (e) =>
+            e.program_day_exercise_id === null &&
+            e.exercise_id === p.exercise_id &&
+            e.set_index === setIndex,
+        )
+      : existing.find(
+          (e) =>
+            e.program_day_exercise_id === p.id && e.set_index === setIndex,
+        );
+
+  function addExercise(ex: PickableExercise) {
+    setBlocks((prev) => {
+      if (prev.some((b) => b.exercise_id === ex.id)) return prev;
+      return [
+        ...prev,
+        {
+          id: `adhoc:${ex.id}`,
+          exercise_id: ex.id,
+          sets: 3,
+          reps_target: "",
+          rpe_target: null,
+          rest_seconds: null,
+          notes: null,
+          exercise: ex,
+        },
+      ];
+    });
+    setPicking(false);
+  }
 
   async function finish() {
     setFinishing(true);
@@ -91,26 +147,40 @@ export function WorkoutPlayer({
       <div className="mx-auto max-w-md space-y-5">
         <header>
           <button
-            onClick={() => router.push("/app")}
+            onClick={() => router.push(solo ? "/app/train" : "/app")}
             className="text-sm text-text-muted transition-colors hover:text-text"
           >
-            ← Today
+            ← {solo ? "Train" : "Today"}
           </button>
           <h1 className="mt-2 text-2xl font-bold">{dayName}</h1>
           <p className="text-sm text-text-muted">
-            Log every set. Your coach sees this.
+            {hasTrainer
+              ? "Log every set. Your coach sees this."
+              : "Log every set. This is just for you."}
           </p>
         </header>
 
-        {prescriptions.map((p) => (
+        {blocks.map((p) => (
           <ExerciseBlock
             key={p.id}
             sessionId={sessionId}
             prescription={p}
+            solo={solo}
+            unit={unit}
             existingFor={existingFor}
             onRest={() => p.rest_seconds && setRest(p.rest_seconds)}
           />
         ))}
+
+        {solo && (
+          <Button
+            variant="secondary"
+            onClick={() => setPicking(true)}
+            className="w-full"
+          >
+            + Add exercise
+          </Button>
+        )}
 
         <Card className="space-y-3">
           <h2 className="font-bold">Finish up</h2>
@@ -130,7 +200,7 @@ export function WorkoutPlayer({
           </label>
           <label className="block text-sm">
             <span className="mb-1 block text-text-muted">
-              Notes for your coach (optional)
+              {hasTrainer ? "Notes for your coach (optional)" : "Notes (optional)"}
             </span>
             <textarea
               rows={2}
@@ -169,6 +239,17 @@ export function WorkoutPlayer({
           </Button>
         </div>
       </div>
+
+      {picking && (
+        <ExercisePicker
+          exercises={exercises}
+          onPick={(exId) => {
+            const ex = exercises.find((e) => e.id === exId);
+            if (ex) addExercise(ex);
+          }}
+          onClose={() => setPicking(false)}
+        />
+      )}
     </main>
   );
 }
@@ -176,49 +257,59 @@ export function WorkoutPlayer({
 function ExerciseBlock({
   sessionId,
   prescription,
+  solo,
+  unit,
   existingFor,
   onRest,
 }: {
   sessionId: string;
   prescription: Prescription;
-  existingFor: (pdeId: string, setIndex: number) => ExistingSet | undefined;
+  solo: boolean;
+  unit: UnitPreference;
+  existingFor: (p: Prescription, setIndex: number) => ExistingSet | undefined;
   onRest: () => void;
 }) {
   const p = prescription;
   const initialNote =
-    Array.from({ length: p.sets }, (_, i) => existingFor(p.id, i + 1)?.pain_note)
+    Array.from({ length: p.sets }, (_, i) => existingFor(p, i + 1)?.pain_note)
       .find((value): value is string => Boolean(value)) ?? "";
   const [note, setNote] = useState(initialNote);
+  // Solo blocks can grow set rows on demand.
+  const [setCount, setSetCount] = useState(p.sets);
 
   return (
     <Card className="space-y-3">
       <div>
         <h2 className="font-bold">{p.exercise?.name ?? "Exercise"}</h2>
         <p className="text-xs uppercase tracking-wide text-text-muted">
-          {p.exercise ? categoryLabel[p.exercise.category] : ""} ·{" "}
-          <span className="tnum">{p.sets}</span> × {p.reps_target}
+          {p.exercise ? categoryLabel[p.exercise.category] : ""}
+          {p.reps_target ? (
+            <>
+              {" "}· <span className="tnum">{p.sets}</span> × {p.reps_target}
+            </>
+          ) : null}
           {p.rpe_target ? ` @ RPE ${p.rpe_target}` : ""}
         </p>
-        {p.notes && (
-          <p className="mt-1 text-sm text-text-muted">{p.notes}</p>
-        )}
+        {p.notes && <p className="mt-1 text-sm text-text-muted">{p.notes}</p>}
       </div>
 
       <div className="space-y-2">
         <div className="grid grid-cols-[2rem_1fr_1fr_1fr] gap-2 text-[10px] uppercase tracking-wide text-text-muted">
           <span>Set</span>
-          <span>Weight (kg)</span>
+          <span>Weight ({weightUnitLabel(unit)})</span>
           <span>Reps</span>
           <span>RPE</span>
         </div>
-        {Array.from({ length: p.sets }, (_, i) => {
+        {Array.from({ length: setCount }, (_, i) => {
           const setIndex = i + 1;
-          const prev = existingFor(p.id, setIndex);
+          const prev = existingFor(p, setIndex);
           return (
             <SetRow
               key={setIndex}
               sessionId={sessionId}
               pde={p}
+              solo={solo}
+              unit={unit}
               setIndex={setIndex}
               prev={prev}
               painNote={note.trim() || null}
@@ -226,17 +317,32 @@ function ExerciseBlock({
             />
           );
         })}
+        {solo && (
+          <button
+            type="button"
+            onClick={() => setSetCount((c) => c + 1)}
+            className="w-full rounded-(--radius-control) border border-dashed border-border py-2 text-sm text-text-muted transition-colors hover:text-text"
+          >
+            + Add set
+          </button>
+        )}
       </div>
 
       <input
         value={note}
         onChange={(e) => setNote(e.target.value)}
         onBlur={() =>
-          void saveExerciseNote(sessionId, p.id, note.trim() || null)
+          void saveExerciseNote(sessionId, {
+            programDayExerciseId: solo ? null : p.id,
+            exerciseId: p.exercise_id,
+            note: note.trim() || null,
+          })
         }
-        placeholder="Substitution / note (optional)…"
+        placeholder={
+          solo ? "Note (optional)…" : "Substitution / note (optional)…"
+        }
         className="w-full rounded-(--radius-control) border border-border bg-surface px-3 py-2 text-sm placeholder:text-text-muted focus:border-accent focus:outline-none"
-        aria-label={`Substitution note for ${p.exercise?.name ?? "exercise"}`}
+        aria-label={`${solo ? "Note" : "Substitution note"} for ${p.exercise?.name ?? "exercise"}`}
       />
     </Card>
   );
@@ -245,6 +351,8 @@ function ExerciseBlock({
 function SetRow({
   sessionId,
   pde,
+  solo,
+  unit,
   setIndex,
   prev,
   painNote,
@@ -252,12 +360,21 @@ function SetRow({
 }: {
   sessionId: string;
   pde: Prescription;
+  solo: boolean;
+  unit: UnitPreference;
   setIndex: number;
   prev: ExistingSet | undefined;
   painNote: string | null;
   onLogged: () => void;
 }) {
-  const [weight, setWeight] = useState(prev?.weight_kg?.toString() ?? "");
+  // Weight is entered in the client's unit and stored in kg.
+  const prevDisplay =
+    prev?.weight_kg != null
+      ? unit === "imperial"
+        ? String(Math.round(kgToLb(prev.weight_kg)))
+        : String(prev.weight_kg)
+      : "";
+  const [weight, setWeight] = useState(prevDisplay);
   const [reps, setReps] = useState(prev?.reps?.toString() ?? "");
   const [rpe, setRpe] = useState(prev?.rpe?.toString() ?? "");
   const saved = useRef(false);
@@ -265,16 +382,32 @@ function SetRow({
   function persist(restAfter: boolean) {
     if (!weight && !reps) return;
     saved.current = true;
-    void saveSet(sessionId, {
-      program_day_exercise_id: pde.id,
-      exercise_id: pde.exercise!.id,
-      set_index: setIndex,
-      weight_kg: weight ? Number(weight) : null,
-      reps: reps ? Number(reps) : null,
-      rpe: rpe ? Number(rpe) : null,
-      pain_note: painNote,
-      substituted_exercise_id: null,
-    });
+    const weightKg = weight
+      ? unit === "imperial"
+        ? Number(lbToKg(Number(weight)).toFixed(2))
+        : Number(weight)
+      : null;
+    if (solo) {
+      void saveSoloSet(sessionId, {
+        exercise_id: pde.exercise_id,
+        set_index: setIndex,
+        weight_kg: weightKg,
+        reps: reps ? Number(reps) : null,
+        rpe: rpe ? Number(rpe) : null,
+        pain_note: painNote,
+      });
+    } else {
+      void saveSet(sessionId, {
+        program_day_exercise_id: pde.id,
+        exercise_id: pde.exercise_id,
+        set_index: setIndex,
+        weight_kg: weightKg,
+        reps: reps ? Number(reps) : null,
+        rpe: rpe ? Number(rpe) : null,
+        pain_note: painNote,
+        substituted_exercise_id: null,
+      });
+    }
     if (restAfter) onLogged();
   }
 

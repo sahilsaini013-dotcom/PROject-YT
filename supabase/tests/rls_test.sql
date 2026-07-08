@@ -75,11 +75,27 @@ values ('ffffffff-0000-0000-0000-000000000003', '22222222-2222-2222-2222-2222222
 insert into public.ai_recommendations (id, client_id, trainer_id, kind, summary, reasoning)
 values ('ffffffff-0000-0000-0000-000000000004', '22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'push_harder', 'Client is cruising', 'Last 3 sessions under target RPE');
 
+-- self-training: client1 owns a routine and a solo session (no assignment).
+-- The routine references trainer1's private exercise, which client1 may read
+-- because they are linked to trainer1.
+insert into public.client_routines (id, client_id, name)
+values ('77777777-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222', 'My Push Day');
+insert into public.client_routine_exercises (id, routine_id, exercise_id, position)
+values ('77777777-0000-0000-0000-000000000002', '77777777-0000-0000-0000-000000000001', 'cccccccc-0000-0000-0000-000000000001', 1);
+insert into public.workout_sessions (id, client_id, scheduled_date, routine_id, title, status)
+values ('77777777-0000-0000-0000-000000000003', '22222222-2222-2222-2222-222222222222', current_date, '77777777-0000-0000-0000-000000000001', 'My Push Day', 'pending');
+insert into public.set_logs (id, session_id, exercise_id, set_index, weight_kg, reps)
+values ('77777777-0000-0000-0000-000000000004', '77777777-0000-0000-0000-000000000003', 'cccccccc-0000-0000-0000-000000000001', 1, 60, 10);
+
+-- client2 owns an (empty) routine, used to test attaching an unreadable exercise.
+insert into public.client_routines (id, client_id, name)
+values ('88888888-0000-0000-0000-000000000001', '44444444-4444-4444-4444-444444444444', 'C2 Routine');
+
 -- ============================================================
 -- Tests
 -- ============================================================
 
-select plan(46);
+select plan(61);
 
 -- Helper: run the rest of the transaction as an authenticated stranger.
 -- (pgTAP runs inside one transaction; set_config(..., true) scopes to it.)
@@ -128,6 +144,22 @@ select is((select count(*) from public.message_threads where id = 'ffffffff-0000
 select is((select count(*) from public.messages), 0::bigint, 'messages: stranger reads no pair-1 messages');
 select is((select count(*) from public.notifications), 0::bigint, 'notifications: another user''s notifications hidden');
 select is((select count(*) from public.ai_recommendations), 0::bigint, 'ai_recommendations: hidden from clients entirely');
+select is((select count(*) from public.client_routines where id = '77777777-0000-0000-0000-000000000001'), 0::bigint, 'client_routines: stranger cannot see another client''s routine');
+select is((select count(*) from public.client_routine_exercises where id = '77777777-0000-0000-0000-000000000002'), 0::bigint, 'client_routine_exercises: stranger cannot see another client''s routine exercises');
+
+-- self-training escalation attempts by the stranger client
+select throws_ok(
+  $$insert into public.client_routines (client_id, name) values ('22222222-2222-2222-2222-222222222222', 'forged')$$,
+  '42501', null, 'client_routines: cannot create a routine for another client');
+select throws_ok(
+  $$insert into public.client_routine_exercises (routine_id, exercise_id, position) values ('88888888-0000-0000-0000-000000000001', 'cccccccc-0000-0000-0000-000000000001', 1)$$,
+  '42501', null, 'client_routine_exercises: cannot attach an exercise the client cannot read');
+select lives_ok(
+  $$insert into public.workout_sessions (client_id, scheduled_date, title, status) values ('44444444-4444-4444-4444-444444444444', current_date, 'Quick workout', 'pending')$$,
+  'workout_sessions: a client can start their own solo session');
+select throws_ok(
+  $$insert into public.workout_sessions (client_id, assignment_id, program_day_id, scheduled_date) values ('44444444-4444-4444-4444-444444444444', 'dddddddd-0000-0000-0000-000000000005', 'dddddddd-0000-0000-0000-000000000003', current_date)$$,
+  '42501', null, 'workout_sessions: a client cannot forge an assigned session');
 
 -- client2 cannot write into client1's data: the update runs but matches
 -- zero rows; verified from the postgres side afterwards.
@@ -190,6 +222,32 @@ select test_as('11111111-1111-1111-1111-111111111111');
 select lives_ok(
   $$update public.messages set read_at = now() where id = 'ffffffff-0000-0000-0000-000000000002'$$,
   'messages: recipient can set read_at');
+
+-- ---- self-training: owner can manage, trainer can read, origin is locked
+select test_as('22222222-2222-2222-2222-222222222222');
+select is((select count(*) from public.client_routines where id = '77777777-0000-0000-0000-000000000001'), 1::bigint, 'client_routines: owner sees their own routine');
+select is((select count(*) from public.client_routine_exercises where id = '77777777-0000-0000-0000-000000000002'), 1::bigint, 'client_routine_exercises: owner sees their routine exercises');
+select is((select count(*) from public.workout_sessions where id = '77777777-0000-0000-0000-000000000003'), 1::bigint, 'workout_sessions: owner sees their solo session');
+select lives_ok(
+  $$insert into public.workout_sessions (client_id, scheduled_date, title, status) values ('22222222-2222-2222-2222-222222222222', current_date + 1, 'Quick workout', 'pending')$$,
+  'workout_sessions: owner can start a solo session');
+select throws_ok(
+  $$update public.workout_sessions set assignment_id = null where id = 'dddddddd-0000-0000-0000-000000000006'$$,
+  'P0001', 'session origin cannot be changed',
+  'workout_sessions: a client cannot rewrite an assigned session''s origin');
+-- solo set upsert dedupes on (session, exercise, set_index) with a null slot
+select public.save_solo_set('77777777-0000-0000-0000-000000000003', 'cccccccc-0000-0000-0000-000000000001', 2, 50, 8, null, null);
+select public.save_solo_set('77777777-0000-0000-0000-000000000003', 'cccccccc-0000-0000-0000-000000000001', 2, 55, 9, null, null);
+select is(
+  (select count(*) from public.set_logs where session_id = '77777777-0000-0000-0000-000000000003' and exercise_id = 'cccccccc-0000-0000-0000-000000000001' and set_index = 2),
+  1::bigint, 'save_solo_set: a repeated save updates one row rather than stacking');
+
+-- linked trainer1 can read client1's solo work; trainer2 cannot
+select test_as('11111111-1111-1111-1111-111111111111');
+select is((select count(*) from public.client_routines where id = '77777777-0000-0000-0000-000000000001'), 1::bigint, 'client_routines: linked trainer can read the client''s routine');
+select is((select count(*) from public.workout_sessions where id = '77777777-0000-0000-0000-000000000003'), 1::bigint, 'workout_sessions: linked trainer can read the client''s solo session');
+select test_as('33333333-3333-3333-3333-333333333333');
+select is((select count(*) from public.client_routines where id = '77777777-0000-0000-0000-000000000001'), 0::bigint, 'client_routines: unlinked trainer cannot read the routine');
 
 select * from finish();
 rollback;

@@ -30,6 +30,8 @@ This document is the single source of truth for what Version 1 includes and excl
 - Workout assignment to a client with a start date.
 - Client Today view showing what is due.
 - Workout player: set logging (weight, reps, RPE), rest timer, exercise substitution note, session summary.
+- Client self-training (DEC-014): a Train tab where any client saves personal routines and starts quick-start solo workouts, logged with the same player, rest timer, and PR detection; coach-assigned sessions keep precedence on Today, and linked trainers see solo work read-only.
+- Client unit preference (DEC-015): weights in kg or lb, height in cm or ft/in, water in liters, chosen at onboarding; the database stays canonical metric.
 
 ### Recovery
 

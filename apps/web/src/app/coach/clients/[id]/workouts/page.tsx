@@ -15,7 +15,7 @@ export default async function ClientWorkouts({
   const { data: sessions } = await supabase
     .from("workout_sessions")
     .select(
-      `id, scheduled_date, status, session_rpe, completed_at,
+      `id, scheduled_date, status, session_rpe, completed_at, title, assignment_id,
        program_day:program_days(name, week:program_weeks(week_index)),
        set_logs(weight_kg, reps, is_pr, exercise:exercises!set_logs_exercise_id_fkey(name))`,
     )
@@ -39,9 +39,15 @@ export default async function ClientWorkouts({
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-bold">
-                  {sessionLabel(
-                    s.program_day?.week?.week_index,
-                    s.program_day?.name,
+                  {s.title ??
+                    sessionLabel(
+                      s.program_day?.week?.week_index,
+                      s.program_day?.name,
+                    )}
+                  {!s.assignment_id && (
+                    <span className="ml-2 text-xs font-semibold uppercase text-text-muted">
+                      Self-guided
+                    </span>
                   )}
                 </h3>
                 <p className="tnum text-xs text-text-muted">

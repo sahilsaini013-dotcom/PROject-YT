@@ -121,19 +121,37 @@ Trainer account and profile.
 
 Client home: what's due today.
 
-- Today's workout card
+- Today's workout card (coach-assigned session takes precedence; a solo session appears as a self-guided card)
+- Entry point to self-guided training when nothing is assigned
 - Check-in prompt
 - Nutrition targets and water progress
 - Unread messages indicator
 
+### Train — `/app/train`
+
+Self-training home (DEC-014). Available to every client.
+
+- Quick-start CTA → creates a solo session and opens the player
+- Saved routines list with start / edit / delete
+- New-routine form
+
+### Routine Editor — `/app/train/routines/[id]`
+
+Build and edit a personal routine.
+
+- Rename
+- Ordered exercise rows (sets, reps target) via the shared exercise picker
+- Start this routine
+
 ### Workout Player — `/app/workout/[sessionId]`
 
-Complete an assigned workout.
+Complete an assigned or solo workout.
 
-- Exercise list with instructions and media
-- Set logging: weight, reps, RPE
+- Exercise list with instructions and media (assigned) or routine/ad-hoc exercises (solo)
+- "Add exercise" and "Add set" for solo sessions
+- Set logging: weight (in the client's unit), reps, RPE
 - Rest timer
-- Exercise substitution note
+- Exercise / substitution note (coach-facing only when a trainer is linked)
 
 ### Session Summary — `/app/workout/[sessionId]/summary`
 

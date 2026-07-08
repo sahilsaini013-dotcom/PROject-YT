@@ -1,5 +1,29 @@
 # Weekly Status
 
+## Week of 2026-07-08 (Post-v1: self-training + units)
+
+### Overall Status
+
+Green. v1 is deployed and live; this is the first post-launch feature slice.
+
+### Completed
+
+- Client **self-training** (DEC-014): new Train tab where any client saves personal routines and starts quick solo workouts, logged through the same player/rest-timer/PR pipeline as assigned work. Coach-assigned sessions keep precedence on Today; linked trainers see solo work read-only. New tables `client_routines` / `client_routine_exercises`, nullable session origin + `routine_id`/`title`, `enforce_session_origin` guard, `save_solo_set` RPC, extracted shared `ExercisePicker`.
+- Client **unit preferences** (DEC-015): onboarding units toggle moved to the top and made functional — kg/lb and ft/in on input, weights rendered per preference in the player, summary, and progress; water shown in liters (client + coach). DB stays canonical metric.
+- Tests: pgTAP 61 assertions (routine isolation, solo-session insert/forge, origin-immutability, trainer visibility, solo-set dedupe); new `e2e/self-training.spec.ts` (imperial onboarding → quick start → add exercise → log in lb → complete → routine start); nutrition water assertions updated to liters.
+
+### Next
+
+- Merge the PR (CI green), apply the migration to the cloud project, redeploy Vercel, and smoke-test the live app.
+
+### Risks
+
+- None blocking. Cloud migration apply + Vercel redeploy need the running Supabase MCP and a fresh Vercel token / git integration.
+
+### Decisions Needed
+
+- None.
+
 ## Week of 2026-07-06 (Sprint 0)
 
 ### Overall Status

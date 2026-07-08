@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
-import { formatKg } from "@training-hub/shared";
+import {
+  formatWeight,
+  type UnitPreference,
+} from "@training-hub/shared";
 import { createClient } from "@/lib/supabase/server";
 import { ButtonLink, Card } from "@/components/ui";
 
@@ -13,14 +16,26 @@ export default async function SummaryPage({
   const { sessionId } = await params;
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { data: session } = await supabase
     .from("workout_sessions")
     .select(
-      "id, status, completed_at, session_rpe, client_notes, program_day:program_days(name)",
+      "id, status, completed_at, session_rpe, client_notes, title, program_day:program_days(name)",
     )
     .eq("id", sessionId)
     .maybeSingle();
   if (!session) notFound();
+
+  const { data: profile } = await supabase
+    .from("client_profiles")
+    .select("unit_preference")
+    .eq("id", user!.id)
+    .maybeSingle();
+  const unit: UnitPreference =
+    profile?.unit_preference === "imperial" ? "imperial" : "metric";
 
   const { data: sets } = await supabase
     .from("set_logs")
@@ -47,7 +62,7 @@ export default async function SummaryPage({
         />
         <div>
           <h1 className="text-3xl font-extrabold">
-            {session.program_day?.name ?? "Workout"} done
+            {session.title ?? session.program_day?.name ?? "Workout"} done
           </h1>
           {session.completed_at && (
             <p className="mt-1 text-sm text-text-muted">
@@ -62,7 +77,7 @@ export default async function SummaryPage({
 
         <div className="grid grid-cols-3 gap-3">
           <Stat label="Sets" value={totalSets} />
-          <Stat label="Volume" value={formatKg(totalVolume)} unit="kg" />
+          <Stat label="Volume" value={formatWeight(totalVolume, unit)} />
           <Stat label="PRs" value={prs.length} accent={prs.length > 0} />
         </div>
 
@@ -74,7 +89,8 @@ export default async function SummaryPage({
                 <li key={i} className="flex justify-between">
                   <span>{s.exercise?.name}</span>
                   <span className="tnum text-text-muted">
-                    {s.weight_kg} kg × {s.reps}
+                    {s.weight_kg != null ? formatWeight(s.weight_kg, unit) : "—"}{" "}
+                    × {s.reps}
                   </span>
                 </li>
               ))}

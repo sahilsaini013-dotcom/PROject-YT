@@ -2,7 +2,6 @@
 
 ## Product
 
-- Should clients be allowed to use Training Hub without a trainer?
 - Should trainers be able to sell public program templates?
 - Should nutrition tracking be macro-detailed by default or simple habit-based by default?
 - Should AI nudges ever go directly to clients, or always require trainer approval?
@@ -22,6 +21,7 @@
 
 - Should the first backend use a managed platform or a custom API service? Answered: managed platform — Supabase (Postgres, Auth, Realtime, Storage, RLS). See DEC-010.
 - Should v1 ship native apps or web-first? Answered: web-first — one Next.js app serving the trainer dashboard and a mobile-first client PWA; native apps come after the coaching loop is proven. See DEC-008.
+- Should clients be allowed to use Training Hub without a trainer? Answered: yes for self-training — any client can save routines and run solo workouts (Train tab); coach-assigned work still takes precedence. A fully trainer-less *public signup* remains deferred (signup is invite-only today). See DEC-014.
 
 ## Brand
 

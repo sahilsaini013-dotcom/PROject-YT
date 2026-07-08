@@ -1,3 +1,4 @@
+import { formatWater } from "@training-hub/shared";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui";
 
@@ -36,7 +37,12 @@ export default async function ClientNutrition({
             <Target label="Protein" value={targets.protein_g} unit="g" />
             <Target label="Carbs" value={targets.carbs_g} unit="g" />
             <Target label="Fat" value={targets.fat_g} unit="g" />
-            <Target label="Water" value={targets.water_ml} unit="ml" />
+            <Target
+              label="Water"
+              display={
+                targets.water_ml != null ? formatWater(targets.water_ml) : "—"
+              }
+            />
           </div>
         ) : (
           <p className="text-sm text-text-muted">
@@ -85,17 +91,24 @@ function Target({
   label,
   value,
   unit,
+  display,
 }: {
   label: string;
-  value: number | null;
-  unit: string;
+  value?: number | null;
+  unit?: string;
+  // Pre-formatted display (e.g. "1.5 L") that overrides the value/unit pair.
+  display?: string;
 }) {
   return (
     <div>
       <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
       <p className="tnum text-lg font-bold">
-        {value ?? "—"}
-        <span className="text-sm font-normal text-text-muted"> {unit}</span>
+        {display ?? (
+          <>
+            {value ?? "—"}
+            <span className="text-sm font-normal text-text-muted"> {unit}</span>
+          </>
+        )}
       </p>
     </div>
   );

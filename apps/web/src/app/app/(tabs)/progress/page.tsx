@@ -1,4 +1,9 @@
 import Image from "next/image";
+import {
+  kgToLb,
+  weightUnitLabel,
+  type UnitPreference,
+} from "@training-hub/shared";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui";
 import { BarChart, LineChart } from "@/components/charts";
@@ -10,6 +15,18 @@ export default async function ProgressPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const { data: unitProfile } = await supabase
+    .from("client_profiles")
+    .select("unit_preference")
+    .eq("id", user!.id)
+    .maybeSingle();
+  const unit: UnitPreference =
+    unitProfile?.unit_preference === "imperial" ? "imperial" : "metric";
+  const unitLabel = weightUnitLabel(unit);
+  // Render a stored-kg value in the client's unit (whole numbers on the chart).
+  const disp = (kg: number) =>
+    unit === "imperial" ? Math.round(kgToLb(kg)) : kg;
 
   // PRs
   const { data: prs } = await supabase
@@ -45,7 +62,7 @@ export default async function ProgressPage() {
     };
     entry.points.push({
       x: new Date(s.created_at).getTime(),
-      y: Number(s.weight_kg),
+      y: disp(Number(s.weight_kg)),
     });
     byExercise.set(key, entry);
   }
@@ -103,7 +120,7 @@ export default async function ProgressPage() {
                 <div className="mb-2 flex items-baseline justify-between">
                   <h2 className="font-bold">{topExercise.name}</h2>
                   <span className="tnum text-sm text-text-muted">
-                    top {Math.max(...trend.map((p) => p.y))} kg
+                    top {Math.max(...trend.map((p) => p.y))} {unitLabel}
                   </span>
                 </div>
                 {trend.length >= 2 ? (
@@ -116,8 +133,8 @@ export default async function ProgressPage() {
                 ) : (
                   <p className="text-sm text-text-muted">
                     Logged{" "}
-                    <span className="tnum">{trend[0].y}</span> kg. Train this a
-                    few more times to see your trend line.
+                    <span className="tnum">{trend[0].y}</span> {unitLabel}. Train
+                    this a few more times to see your trend line.
                   </p>
                 )}
               </Card>
@@ -143,7 +160,7 @@ export default async function ProgressPage() {
                       >
                         <span className="font-medium">{pr.exercise?.name}</span>
                         <span className="tnum font-bold text-accent">
-                          {pr.value} kg
+                          {disp(Number(pr.value))} {unitLabel}
                         </span>
                       </li>
                     ))}

@@ -253,6 +253,86 @@ export type Database = {
           },
         ]
       }
+      client_routine_exercises: {
+        Row: {
+          created_at: string
+          exercise_id: string
+          id: string
+          position: number
+          reps_target: string | null
+          routine_id: string
+          target_sets: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_id: string
+          id?: string
+          position: number
+          reps_target?: string | null
+          routine_id: string
+          target_sets?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          exercise_id?: string
+          id?: string
+          position?: number
+          reps_target?: string | null
+          routine_id?: string
+          target_sets?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_routine_exercises_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_routine_exercises_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "client_routines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_routines: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_routines_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercise_media: {
         Row: {
           created_at: string
@@ -1204,48 +1284,54 @@ export type Database = {
       }
       workout_sessions: {
         Row: {
-          assignment_id: string
+          assignment_id: string | null
           client_id: string
           client_notes: string | null
           completed_at: string | null
           created_at: string
           id: string
-          program_day_id: string
+          program_day_id: string | null
+          routine_id: string | null
           scheduled_date: string
           session_rpe: number | null
           skipped_reason: string | null
           started_at: string | null
           status: Database["public"]["Enums"]["session_status"]
+          title: string | null
           updated_at: string
         }
         Insert: {
-          assignment_id: string
+          assignment_id?: string | null
           client_id: string
           client_notes?: string | null
           completed_at?: string | null
           created_at?: string
           id?: string
-          program_day_id: string
+          program_day_id?: string | null
+          routine_id?: string | null
           scheduled_date: string
           session_rpe?: number | null
           skipped_reason?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["session_status"]
+          title?: string | null
           updated_at?: string
         }
         Update: {
-          assignment_id?: string
+          assignment_id?: string | null
           client_id?: string
           client_notes?: string | null
           completed_at?: string | null
           created_at?: string
           id?: string
-          program_day_id?: string
+          program_day_id?: string | null
+          routine_id?: string | null
           scheduled_date?: string
           session_rpe?: number | null
           skipped_reason?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["session_status"]
+          title?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1268,6 +1354,13 @@ export type Database = {
             columns: ["program_day_id"]
             isOneToOne: false
             referencedRelation: "program_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_sessions_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "client_routines"
             referencedColumns: ["id"]
           },
         ]
@@ -1337,6 +1430,19 @@ export type Database = {
       is_trainer: { Args: { _user: string }; Returns: boolean }
       meal_log_client: { Args: { _meal_log: string }; Returns: string }
       program_trainer: { Args: { _program: string }; Returns: string }
+      routine_client: { Args: { _routine: string }; Returns: string }
+      save_solo_set: {
+        Args: {
+          _exercise_id: string
+          _pain_note?: string
+          _reps?: number
+          _rpe?: number
+          _session_id: string
+          _set_index: number
+          _weight_kg?: number
+        }
+        Returns: undefined
+      }
       session_client: { Args: { _session: string }; Returns: string }
       storage_path_owner: { Args: { _name: string }; Returns: string }
       week_program: { Args: { _week: string }; Returns: string }
@@ -1576,4 +1682,3 @@ export const Constants = {
     },
   },
 } as const
-

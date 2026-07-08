@@ -6,6 +6,11 @@ import { usePathname } from "next/navigation";
 const tabs = [
   { href: "/app", label: "Today", icon: "M3 12l9-9 9 9M5 10v10h14V10" },
   {
+    href: "/app/train",
+    label: "Train",
+    icon: "M6.5 6.5l11 11M4 8l1.5-1.5M8 4l-1.5 1.5M20 16l-1.5 1.5M16 20l1.5-1.5M3 14l7-7 4 4-7 7",
+  },
+  {
     href: "/app/check-in",
     label: "Check-in",
     icon: "M9 12l2 2 4-4M12 3a9 9 0 100 18 9 9 0 000-18z",

@@ -116,9 +116,9 @@ test("client checks in, logs a meal with photo, tracks water vs target", async (
   );
   expect(publicRes.status()).toBeGreaterThanOrEqual(400);
 
-  // Water tracking against the 3000ml target
-  await cp.getByRole("button", { name: "+250 ml" }).click();
-  await expect(cp.getByText(/250 ml \/ 3000 ml/)).toBeVisible();
+  // Water tracking against the 3 L target (stored as ml, shown in liters)
+  await cp.getByRole("button", { name: "+0.25 L" }).click();
+  await expect(cp.getByText(/0\.25 L \/ 3 L/)).toBeVisible();
 
   // The upsert is async; poll until it lands.
   await expect

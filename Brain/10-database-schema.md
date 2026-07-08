@@ -183,16 +183,41 @@ Assigning a program to a client materializes workout_sessions on a schedule.
 | status | assignment_status | not null default 'active' | |
 | notes | text | | Assignment-level trainer notes |
 
-#### workout_sessions
+#### client_routines
 
-One row per scheduled workout for a client. This is the Today screen.
+A client's saved self-training routine (DEC-014). Owned by the client; a linked trainer may read it.
 
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
 | id | uuid | pk | |
-| assignment_id | uuid | not null, references program_assignments(id) on delete cascade | |
+| client_id | uuid | not null, references profiles(id) on delete cascade | |
+| name | text | not null | |
+
+#### client_routine_exercises
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| id | uuid | pk | |
+| routine_id | uuid | not null, references client_routines(id) on delete cascade | |
+| exercise_id | uuid | not null, references exercises(id) | Must be readable by the client (enforced in RLS with_check) |
+| position | int | not null | Order within the routine |
+| target_sets | int | not null default 3 | |
+| reps_target | text | | Same free-text convention as program_day_exercises |
+
+#### workout_sessions
+
+One row per workout for a client — coach-assigned or solo. This is the Today screen.
+
+A session is either **assigned** (both `assignment_id` and `program_day_id` set, `routine_id`/`title` null) or **solo** (both null; optional `routine_id`, `title` snapshot). Enforced by `workout_sessions_origin_check` and immutable after insert via `enforce_session_origin`.
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| id | uuid | pk | |
+| assignment_id | uuid | references program_assignments(id) on delete cascade | Null for solo sessions |
 | client_id | uuid | not null, references profiles(id) | Denormalized for RLS and hot queries |
-| program_day_id | uuid | not null, references program_days(id) | |
+| program_day_id | uuid | references program_days(id) | Null for solo sessions |
+| routine_id | uuid | references client_routines(id) on delete set null | Set when a solo session started from a routine |
+| title | text | | Display snapshot for solo sessions ("Quick workout" or the routine name) |
 | scheduled_date | date | not null | |
 | status | session_status | not null default 'pending' | |
 | skipped_reason | text | | Free text; AI input |
@@ -203,11 +228,13 @@ One row per scheduled workout for a client. This is the Today screen.
 
 #### set_logs
 
+Solo sets carry a null `program_day_exercise_id`; their identity is `(session_id, exercise_id, set_index)`, enforced by a partial unique index `set_logs_solo_slot_uniq` and written through the `save_solo_set` RPC.
+
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
 | id | uuid | pk | |
 | session_id | uuid | not null, references workout_sessions(id) on delete cascade | |
-| program_day_exercise_id | uuid | references program_day_exercises(id) | Null for freestyle/extra sets |
+| program_day_exercise_id | uuid | references program_day_exercises(id) | Null for freestyle/solo sets |
 | exercise_id | uuid | not null, references exercises(id) | The prescribed exercise |
 | set_index | int | not null | 1-based within the exercise |
 | weight_kg | numeric | | Null for bodyweight/cardio |
@@ -482,8 +509,9 @@ create policy "trainer_write_nutrition_targets" on nutrition_targets
 | exercise_media | follows exercises | follows exercises |
 | programs / weeks / days / day_exercises | read when assigned to them | full on own programs |
 | program_assignments | read own | full for own clients |
-| workout_sessions | read/update own (log, complete, skip) | read + insert/update for own clients |
-| set_logs | full on own sessions | read for own clients |
+| client_routines / client_routine_exercises | full own (exercise must be readable) | read for own clients |
+| workout_sessions | read/update own; insert own **solo** sessions only (assigned come from `assign_program`) | read + insert/update for own clients |
+| set_logs | full on own sessions (solo sets via `save_solo_set`) | read for own clients |
 | personal_records | read own (insert via backend) | read for own clients |
 | nutrition_targets | read own | insert/update for own clients |
 | meal_logs / meal_photos | full own | read for own clients |
@@ -508,10 +536,11 @@ create policy "trainer_write_nutrition_targets" on nutrition_targets
 Security-definer RPCs (the privileged write paths):
 - `create_invitation`, `get_invitation`, `accept_invitation` — invitation lifecycle.
 - `assign_program(program, client, start_date, notes)` — atomic assignment: validates ownership + active link, blocks duplicate active assignment, materializes one `workout_sessions` row per program day (day D of week W → start_date + ((W-1)*7 + (D-1))), writes the workout_assigned notification.
-- `complete_workout_session(session, rpe, notes)` — recomputes weight + Epley e1rm PRs from `set_logs`, inserts `personal_records` (clients can't insert them directly), flags the PR set, marks the session done.
+- `complete_workout_session(session, rpe, notes)` — recomputes weight + Epley e1rm PRs from `set_logs`, inserts `personal_records` (clients can't insert them directly), flags the PR set, marks the session done. Works for assigned and solo sessions (ownership-only check).
 - `email_for_user(user)` — resolves an auth email for notification emails; guarded to self or an actively-linked client only.
+- `save_solo_set(session, exercise, set_index, weight, reps, rpe, pain_note)` — security **invoker** (set_logs RLS still applies); upserts a solo set on the partial unique index `(session, exercise, set_index) where program_day_exercise_id is null`, which PostgREST upserts cannot target. `routine_client(routine)` is the security-definer helper backing routine RLS.
 
-Triggers: `handle_new_user` (profile on signup), `enforce_trainer_clients_transitions` (immutable participants; invited→active only inside the accept RPC), `enforce_message_update` (messages immutable except read_at, settable only by the recipient), `enforce_profile_role_immutable` (role fixed at signup), `notify_on_message` (message_received notification to the recipient). `messages` is on the `supabase_realtime` publication (RLS-filtered per subscriber).
+Triggers: `handle_new_user` (profile on signup), `enforce_trainer_clients_transitions` (immutable participants; invited→active only inside the accept RPC), `enforce_message_update` (messages immutable except read_at, settable only by the recipient), `enforce_profile_role_immutable` (role fixed at signup), `enforce_session_origin` (a session's client/assignment/program_day are immutable after insert), `notify_on_message` (message_received notification to the recipient). `messages` is on the `supabase_realtime` publication (RLS-filtered per subscriber).
 
 Notifications fire (in-app rows + email via the app's SMTP transport — Mailpit in dev/CI) for invite, workout_assigned, and message_received.
 

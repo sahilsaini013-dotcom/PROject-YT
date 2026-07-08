@@ -20,6 +20,7 @@ Training Hub v1 is **deployed and live**: https://training-hub-lyart.vercel.app 
 
 | ID | Task | Owner | Notes |
 | --- | --- | --- | --- |
+| D2-001 | Client self-training (Train tab) + unit preferences | Claude | DEC-014/DEC-015: routines + solo workouts, lb/kg + ft/in + liters. New migration, pgTAP 61, e2e self-training. PR open. |
 | D1-001 | Cloud backend deploy + legacy data review | Claude | PR #12 (merged): migrations/seed applied to cloud, advisors hardening migration, live RLS smoke test clean. |
 | D1-002 | Vercel frontend deploy | Claude | Live at training-hub-lyart.vercel.app; env vars set; browser journey verified against the cloud DB. |
 | V1-FINAL | Final UI audit and release bookkeeping | Codex | Merged (PR #10/#11): final audit artifact inspected, no release-blocking findings. |

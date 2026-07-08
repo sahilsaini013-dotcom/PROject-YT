@@ -32,17 +32,54 @@ export async function saveSet(sessionId: string, set: SavedSet) {
   );
 }
 
+export type SoloSet = {
+  exercise_id: string;
+  set_index: number;
+  weight_kg: number | null;
+  reps: number | null;
+  rpe: number | null;
+  pain_note: string | null;
+};
+
+export async function saveSoloSet(sessionId: string, set: SoloSet) {
+  const supabase = await createClient();
+  // Solo sets have no program-day-exercise slot, so a partial unique index
+  // keys them by (session, exercise, set_index); PostgREST can't target it, so
+  // the upsert goes through a security-invoker RPC.
+  await supabase.rpc("save_solo_set", {
+    _session_id: sessionId,
+    _exercise_id: set.exercise_id,
+    _set_index: set.set_index,
+    _weight_kg: set.weight_kg ?? undefined,
+    _reps: set.reps ?? undefined,
+    _rpe: set.rpe ?? undefined,
+    _pain_note: set.pain_note ?? undefined,
+  });
+}
+
 export async function saveExerciseNote(
   sessionId: string,
-  programDayExerciseId: string,
-  note: string | null,
+  {
+    programDayExerciseId,
+    exerciseId,
+    note,
+  }: {
+    programDayExerciseId: string | null;
+    exerciseId: string;
+    note: string | null;
+  },
 ) {
   const supabase = await createClient();
-  await supabase
+  const query = supabase
     .from("set_logs")
     .update({ pain_note: note })
-    .eq("session_id", sessionId)
-    .eq("program_day_exercise_id", programDayExerciseId);
+    .eq("session_id", sessionId);
+  // Assigned sets are addressed by slot; solo sets by exercise with a null slot.
+  if (programDayExerciseId === null) {
+    await query.eq("exercise_id", exerciseId).is("program_day_exercise_id", null);
+  } else {
+    await query.eq("program_day_exercise_id", programDayExerciseId);
+  }
 }
 
 export type PrAchieved = {
