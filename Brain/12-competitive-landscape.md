@@ -1,6 +1,8 @@
 # Competitive Landscape & Market Research
 
-_Compiled 2026-07-08. First formal competitive scan for Training Hub (the Research Log was previously empty). All prices are US, as advertised on the dates cited, and drift over time — re-verify before quoting externally. Review/forum claims are labeled as **sentiment**, not fact._
+_Compiled 2026-07-08, expanded 2026-07-09. First formal competitive scan for Training Hub (the Research Log was previously empty). All prices are US, as advertised on the dates cited, and drift over time — re-verify before quoting externally. Review/forum claims are labeled as **sentiment**, not fact._
+
+> **This is the competitor doc.** It sits in a four-part landscape set: **`Brain/13`** (market size & segments), **`Brain/14`** (business models & GTM / unit economics), **`Brain/15`** (tech, AI, behavioral science, compliance), and **`Brain/16`** (whole-space synthesis + master source index). Strategy in `Work Tracking/13-strategy-brief.md`; ranked features in `Work Tracking/14-opportunity-backlog.md`._
 
 ## 1. Market context — big, growing, AI-anxious
 
@@ -38,6 +40,34 @@ _Compiled 2026-07-08. First formal competitive scan for Training Hub (the Resear
 - **MyFitnessPal / Cronometer** — the nutrition-logging habit clients already have (integration targets, not competitors).
 
 **Why they matter:** a trainer platform's **client app is its weakest surface** vs these. Whoever gives trainers a Hevy-grade client experience wins the data that feeds everything else (progress, AI, retention).
+
+### Tier 4 — hybrid human+AI D2C coaching (the "coaching is worth $150–300" anchor)
+
+Not direct competitors (they sell to *consumers*, not trainers) — but they matter two ways: they set the **price anchor for what coaching is worth**, and they are **who our trainers' clients defect to** if a trainer's tooling is weak.
+
+- **Caliber** — matches a client to a certified coach in-app; ~$50/mo program-only up to **~$200/mo Premium** (dedicated coach, frequent comms). Athletech has openly floated that in the AI age **human coaching becomes a luxury tier** — Caliber leans into that.
+- **Future** — **$149/mo** standard, **$199/mo** elite coach; premium 1:1 human coaching via app.
+- **Trainwell** (formerly CoPilot) — real human trainer matched to the client; positioned squarely on "a real human, not AI."
+
+**Read:** consumers pay **$150–300/mo for a coach delivered through good software.** That is the value a great trainer platform indirectly unlocks for *our* customers — and the reason "help the trainer keep clients" is worth building.
+
+### Comprehensive competitor matrix
+
+| Platform | Layer | Headline price | Nutrition | AI posture | Client-app strength | Standout gap |
+|---|---|---|---|---|---|---|
+| **Trainerize** | Coach SaaS | ~$135/mo Pro-50 + $45 nutrition | Add-on (+$45) | AI Workout Builder | Strong, branded | Price when fully-loaded |
+| **TrueCoach** | Coach SaaS | ~$137/mo @50 **+5% skim** | Weak (docs+MFP) | Minimal | Good (video feedback loved) | Payment skim; nutrition |
+| **Everfit** | Coach SaaS | ~$79 base **+~$65 add-ons** | MacroSnap add-on | AI builder + food scan | Best-rated client app | Add-on stacking; no dark mode |
+| **Kahunas** | Coach SaaS | **$35–99/mo** (Essentials→Ultimate) | Basic; weak meal-planning (sentiment) | Branded-app focus | Branded app, voice notes | Meal planning; AI depth |
+| **FitBudd** | Coach SaaS | Pro/Super Pro/Elite (branded app) | Bundled | Publishes AI research; branding-led | Custom-branded app + website | AI copilot depth |
+| **My PT Hub** | Coach SaaS | **Unlimited clients** flat-ish | Integrated | Standard | Solid all-in-one | Chat glitches (sentiment) |
+| **PT Distinction** | Coach SaaS | Tiered (Capterra-listed) | Integrated | Standard | Customizable | Fragmented niche |
+| **Caliber / Future / Trainwell** | Human D2C | **$149–300/mo** | Coach-set | Human-first (anti-AI framing) | Premium 1:1 feel | Not for trainers |
+| **Hevy** | Consumer | Free / prosumer | — | HevyGPT + AI trainer (Feb 2026) | **The engagement bar** | No coach side |
+| **MacroFactor / Carbon** | Consumer nutrition | Prosumer sub | **Adaptive targets** (the bar) | Algorithmic | Great nutrition UX | Nutrition-only |
+| **Training Hub** | Coach SaaS | TBD (flat, all-in proposed) | Simple, **included** | **Decision-support copilot (specced)** | Shipped, dark/native | Copilot not built yet |
+
+_The market splits into "cheap-but-shallow" (Kahunas, some FitBudd tiers) and "capable-but-nickel-and-dimed" (Trainerize, Everfit, TrueCoach). **Nobody occupies "capable + all-inclusive + copilot."**_
 
 ## 3. Pricing teardown (fully-loaded, not headline)
 
